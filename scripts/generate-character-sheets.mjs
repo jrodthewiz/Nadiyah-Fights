@@ -35,6 +35,9 @@ const variants = [
     accent2: "#f2c14e",
     skin: "#111317",
     hair: "#050607",
+    trim: "#0ea5a4",
+    eye: "#fff7c2",
+    stance: 1,
   },
   {
     id: "ember",
@@ -44,6 +47,9 @@ const variants = [
     accent2: "#ffd166",
     skin: "#15100d",
     hair: "#120807",
+    trim: "#dc2626",
+    eye: "#ffe4b5",
+    stance: 1.04,
   },
   {
     id: "violet",
@@ -53,6 +59,9 @@ const variants = [
     accent2: "#67e8f9",
     skin: "#120f1d",
     hair: "#090511",
+    trim: "#7c3aed",
+    eye: "#d9f99d",
+    stance: 0.96,
   },
   {
     id: "frost",
@@ -62,6 +71,9 @@ const variants = [
     accent2: "#f8fafc",
     skin: "#0c1720",
     hair: "#071015",
+    trim: "#2563eb",
+    eye: "#ecfeff",
+    stance: 1.08,
   },
 ];
 
@@ -93,6 +105,10 @@ const pose = (animation, index, count) => {
     scarfX: -46,
     scarfY: -114,
     sashY: -88,
+    trail: 0,
+    spark: 0,
+    guard: 0,
+    sweat: 0,
   };
 
   if (animation === "idle") {
@@ -128,6 +144,7 @@ const pose = (animation, index, count) => {
     p.armBackY = -126;
   } else if (animation === "dashForward") {
     p.lean = 18;
+    p.trail = 1;
     p.armFrontX = 58;
     p.armFrontY = -96;
     p.armBackX = -46;
@@ -140,6 +157,7 @@ const pose = (animation, index, count) => {
     p.armFrontY = -116 - strike * 8;
     p.armBackX = -32;
     p.armBackY = -82;
+    p.spark = strike;
   } else if (animation === "heavyPunch") {
     p.lean = -8 + strike * 18;
     p.armFrontX = 34 + strike * 62;
@@ -147,6 +165,7 @@ const pose = (animation, index, count) => {
     p.armBackX = -48 + strike * 10;
     p.armBackY = -86;
     p.legFrontX = 38;
+    p.spark = strike;
   } else if (animation === "kick") {
     p.lean = -10 + strike * 6;
     p.armFrontX = 32;
@@ -154,6 +173,7 @@ const pose = (animation, index, count) => {
     p.legFrontX = 24 + strike * 68;
     p.legFrontY = -2 - strike * 48;
     p.legBackX = -38;
+    p.spark = strike;
   } else if (animation === "blockHigh") {
     p.lean = -7;
     p.armFrontX = 26;
@@ -162,6 +182,7 @@ const pose = (animation, index, count) => {
     p.armBackY = -104;
     p.legFrontX = 22;
     p.legBackX = -34;
+    p.guard = 1;
   } else if (animation === "hitStun") {
     p.lean = -18 - strike * 8;
     p.headTilt = -7;
@@ -170,6 +191,7 @@ const pose = (animation, index, count) => {
     p.armBackX = -50;
     p.armBackY = -98;
     p.legFrontX = 20;
+    p.sweat = strike;
   } else if (animation === "knockdown") {
     p.down = 42 * t;
     p.lean = -58 * t;
@@ -212,39 +234,69 @@ const pose = (animation, index, count) => {
   return p;
 };
 
-const line = (x1, y1, x2, y2, color, width = 10, cap = "round") =>
-  `<line x1="${round(x1)}" y1="${round(y1)}" x2="${round(x2)}" y2="${round(y2)}" stroke="${color}" stroke-width="${width}" stroke-linecap="${cap}" />`;
+const line = (x1, y1, x2, y2, color, width = 10, cap = "round", opacity = 1) =>
+  `<line x1="${round(x1)}" y1="${round(y1)}" x2="${round(x2)}" y2="${round(y2)}" stroke="${color}" stroke-width="${width}" stroke-linecap="${cap}" opacity="${opacity}" />`;
+
+const outlinedLine = (x1, y1, x2, y2, color, width = 10, cap = "round") => `
+      ${line(x1, y1, x2, y2, "#000000", width + 5, cap, 0.78)}
+      ${line(x1, y1, x2, y2, color, width, cap)}
+      ${line(x1, y1 - 1, x2, y2 - 1, "rgba(255,255,255,0.16)", Math.max(2, width * 0.22), cap)}`;
+
+const burst = (x, y, color, amount) => amount <= 0.08 ? "" : `
+      ${line(x + 6, y - 2, x + 26, y - 15, color, 3, "round", 0.84)}
+      ${line(x + 8, y + 5, x + 31, y + 7, color, 3, "round", 0.72)}
+      ${line(x + 3, y + 9, x + 18, y + 24, color, 3, "round", 0.55)}
+      <circle cx="${round(x + 20)}" cy="${round(y - 7)}" r="${round(2 + amount * 3)}" fill="${color}" opacity="0.75" />`;
+
+const guardFlash = (x, y, color, enabled) => enabled ? `
+      <path d="M ${round(x - 10)} ${round(y - 42)} C ${round(x + 42)} ${round(y - 26)}, ${round(x + 43)} ${round(y + 38)}, ${round(x - 6)} ${round(y + 49)}" fill="none" stroke="${color}" stroke-width="4" opacity="0.48" stroke-linecap="round" />
+      <path d="M ${round(x - 3)} ${round(y - 32)} C ${round(x + 31)} ${round(y - 16)}, ${round(x + 30)} ${round(y + 26)}, ${round(x)} ${round(y + 38)}" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.32" stroke-linecap="round" />` : "";
 
 const frameSvg = (variant, animation, index, count) => {
   const p = pose(animation, index, count);
   const cx = frame.width / 2;
   const floor = frame.height - 16 + p.down;
+  const stance = variant.stance ?? 1;
   const hip = { x: cx + p.lean * 0.2, y: floor - 62 - p.crouch * 0.55 + p.bob };
   const chest = { x: cx + p.lean, y: floor - 112 + p.crouch * 0.25 + p.bob };
   const head = { x: cx + p.lean + p.headTilt, y: floor - 144 + p.crouch * 0.28 + p.bob };
   const frontHand = { x: chest.x + p.armFrontX, y: chest.y + (p.armFrontY + 112) };
   const backHand = { x: chest.x + p.armBackX, y: chest.y + (p.armBackY + 112) };
-  const frontFoot = { x: hip.x + p.legFrontX, y: floor + p.legFrontY };
-  const backFoot = { x: hip.x + p.legBackX, y: floor + p.legBackY };
+  const frontFoot = { x: hip.x + p.legFrontX * stance, y: floor + p.legFrontY };
+  const backFoot = { x: hip.x + p.legBackX * stance, y: floor + p.legBackY };
   const scarfEnd = { x: head.x + p.scarfX, y: head.y + (p.scarfY + 144) };
   const sashEnd = { x: chest.x + 26, y: chest.y + (p.sashY + 112) };
 
   return `
     <g>
-      ${line(backFoot.x + 4, backFoot.y + 7, frontFoot.x - 4, frontFoot.y + 7, "rgba(0,0,0,0.18)", 12)}
+      <ellipse cx="${round((backFoot.x + frontFoot.x) / 2)}" cy="${round(floor + 8)}" rx="${round(48 + Math.abs(p.lean) * 0.24)}" ry="7" fill="#000000" opacity="0.22" />
+      ${p.trail ? `${line(head.x - 68, head.y + 9, head.x - 23, head.y + 9, variant.accent, 5, "round", 0.23)}
+      ${line(chest.x - 82, chest.y + 4, chest.x - 22, chest.y + 2, variant.accent2, 4, "round", 0.18)}` : ""}
+      ${line(head.x - 16, head.y + 9, scarfEnd.x, scarfEnd.y, "#000000", 12, "round", 0.56)}
       ${line(head.x - 16, head.y + 9, scarfEnd.x, scarfEnd.y, variant.accent, 7)}
-      ${line(head.x + 2, head.y + 20, chest.x, chest.y, variant.ink, 10)}
-      ${line(chest.x, chest.y, hip.x, hip.y, variant.ink, 11)}
-      ${line(chest.x, chest.y + 5, frontHand.x, frontHand.y, variant.ink, 10)}
-      ${line(chest.x - 2, chest.y + 8, backHand.x, backHand.y, variant.ink, 9)}
-      ${line(hip.x, hip.y, frontFoot.x, frontFoot.y, variant.ink, 10)}
-      ${line(hip.x, hip.y, backFoot.x, backFoot.y, variant.ink, 10)}
+      ${outlinedLine(head.x + 2, head.y + 20, chest.x, chest.y, variant.ink, 10)}
+      ${outlinedLine(chest.x, chest.y, hip.x, hip.y, variant.ink, 12)}
+      ${outlinedLine(chest.x, chest.y + 5, frontHand.x, frontHand.y, variant.ink, 10)}
+      ${outlinedLine(chest.x - 2, chest.y + 8, backHand.x, backHand.y, variant.ink, 9)}
+      ${outlinedLine(hip.x, hip.y, frontFoot.x, frontFoot.y, variant.ink, 10)}
+      ${outlinedLine(hip.x, hip.y, backFoot.x, backFoot.y, variant.ink, 10)}
+      ${line(chest.x - 20, chest.y + 17, sashEnd.x, sashEnd.y, "#000000", 10, "round", 0.54)}
       ${line(chest.x - 19, chest.y + 16, sashEnd.x, sashEnd.y, variant.accent, 6)}
-      <circle cx="${round(head.x)}" cy="${round(head.y)}" r="19" fill="${variant.hair}" />
-      <path d="M ${round(head.x - 4)} ${round(head.y - 18)} C ${round(head.x - 22)} ${round(head.y - 24)}, ${round(head.x - 28)} ${round(head.y - 2)}, ${round(head.x - 14)} ${round(head.y + 12)}" fill="${variant.hair}" opacity="0.96" />
-      <circle cx="${round(head.x + 7)}" cy="${round(head.y - 3)}" r="3.4" fill="${variant.accent2}" />
-      <circle cx="${round(frontHand.x)}" cy="${round(frontHand.y)}" r="6" fill="${variant.accent2}" />
-      <circle cx="${round(backHand.x)}" cy="${round(backHand.y)}" r="5" fill="${variant.accent}" />
+      <circle cx="${round(head.x)}" cy="${round(head.y)}" r="22" fill="#000000" opacity="0.82" />
+      <circle cx="${round(head.x)}" cy="${round(head.y)}" r="18.4" fill="${variant.hair}" />
+      <path d="M ${round(head.x - 5)} ${round(head.y - 18)} C ${round(head.x - 25)} ${round(head.y - 25)}, ${round(head.x - 30)} ${round(head.y - 3)}, ${round(head.x - 15)} ${round(head.y + 13)}" fill="${variant.hair}" stroke="#000000" stroke-width="3" opacity="0.98" />
+      <path d="M ${round(head.x - 9)} ${round(head.y - 24)} C ${round(head.x + 9)} ${round(head.y - 33)}, ${round(head.x + 23)} ${round(head.y - 17)}, ${round(head.x + 14)} ${round(head.y - 4)}" fill="${variant.trim}" opacity="0.85" />
+      <circle cx="${round(head.x + 7)}" cy="${round(head.y - 3)}" r="3.8" fill="${variant.eye}" />
+      <path d="M ${round(head.x + 2)} ${round(head.y + 8)} Q ${round(head.x + 8)} ${round(head.y + 12)}, ${round(head.x + 14)} ${round(head.y + 8)}" fill="none" stroke="${variant.accent2}" stroke-width="2" opacity="0.75" stroke-linecap="round" />
+      <circle cx="${round(frontHand.x)}" cy="${round(frontHand.y)}" r="9.2" fill="#000000" opacity="0.72" />
+      <circle cx="${round(frontHand.x)}" cy="${round(frontHand.y)}" r="6.4" fill="${variant.accent2}" />
+      <circle cx="${round(backHand.x)}" cy="${round(backHand.y)}" r="8" fill="#000000" opacity="0.7" />
+      <circle cx="${round(backHand.x)}" cy="${round(backHand.y)}" r="5.6" fill="${variant.accent}" />
+      ${line(frontFoot.x - 9, frontFoot.y + 1, frontFoot.x + 13, frontFoot.y + 1, variant.accent2, 5)}
+      ${line(backFoot.x - 10, backFoot.y + 1, backFoot.x + 12, backFoot.y + 1, variant.accent, 5)}
+      ${guardFlash(frontHand.x + 3, frontHand.y + 3, variant.accent, p.guard)}
+      ${burst(Math.max(frontHand.x, frontFoot.x), Math.min(frontHand.y, frontFoot.y), variant.accent2, p.spark)}
+      ${p.sweat ? `<circle cx="${round(head.x + 23)}" cy="${round(head.y - 14)}" r="${round(2 + p.sweat * 2)}" fill="${variant.accent2}" opacity="0.8" />` : ""}
     </g>`;
 };
 

@@ -175,7 +175,7 @@ button:hover { border-color: var(--gold); background: linear-gradient(180deg, rg
 .match-panel button { justify-self: center; min-width: 150px; }
 .panel-sprite { justify-self: center; }
 .event-banner { position: absolute; left: 50%; top: 36%; transform: translate(-50%, -50%); color: var(--gold); text-transform: uppercase; font-family: Impact, "Arial Black", sans-serif; font-size: clamp(4rem, 14vw, 9rem); line-height: 1; text-shadow: 0 8px 0 #050607, 0 0 32px rgba(242, 193, 78, 0.55); }
-.event-banner.fight { color: #a7fff2; text-shadow: 0 8px 0 #050607, 0 0 32px rgba(17, 197, 170, 0.55); opacity: 0.34; }
+.event-banner.fight { top: 31%; color: #a7fff2; font-size: clamp(2.6rem, 8vw, 5.6rem); text-shadow: 0 5px 0 #050607, 0 0 24px rgba(17, 197, 170, 0.42); opacity: 0.2; }
 .ended-panel h2 { margin: 0; color: var(--gold); text-transform: uppercase; }
 
 @media (max-width: 760px) {
