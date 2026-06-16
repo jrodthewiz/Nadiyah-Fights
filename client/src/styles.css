@@ -1,0 +1,94 @@
+:root {
+  color-scheme: dark;
+  --ink: #07090b;
+  --panel: rgba(13, 18, 22, 0.86);
+  --panel-strong: rgba(7, 9, 11, 0.94);
+  --line: rgba(242, 193, 78, 0.55);
+  --teal: #11c5aa;
+  --gold: #f2c14e;
+  --red: #f43f5e;
+  --blue: #38bdf8;
+  --paper: #f4efe2;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* { box-sizing: border-box; }
+html, body, #game-root, #hud-root { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+body { background: var(--ink); color: var(--paper); }
+canvas { display: block; }
+button, input { font: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; opacity: 0.55; }
+
+.hud { position: fixed; inset: 0; pointer-events: none; }
+.hud [hidden] { display: none !important; }
+.hud button, .hud input { pointer-events: auto; }
+
+.lobby-panel {
+  position: absolute;
+  left: clamp(16px, 5vw, 72px);
+  top: clamp(16px, 6vh, 56px);
+  width: min(460px, calc(100vw - 32px));
+  display: grid;
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: linear-gradient(150deg, rgba(7, 9, 11, 0.95), rgba(17, 29, 33, 0.9));
+  box-shadow: 0 26px 80px rgba(0, 0, 0, 0.45);
+}
+
+.brand-lockup { display: flex; align-items: center; gap: 14px; }
+.brand-mark {
+  width: 54px; height: 54px; display: grid; place-items: center; flex: 0 0 auto;
+  border: 2px solid var(--gold); color: var(--gold); background: #111317; font-weight: 900; border-radius: 6px;
+}
+h1 { margin: 0; font-size: clamp(2rem, 6vw, 3.4rem); line-height: 0.9; letter-spacing: 0; font-family: Impact, "Arial Black", sans-serif; color: var(--gold); text-transform: uppercase; }
+p { margin: 0; color: rgba(244, 239, 226, 0.78); }
+.status-pill { justify-self: start; padding: 8px 12px; border: 1px solid rgba(17, 197, 170, 0.45); border-radius: 999px; background: rgba(17, 197, 170, 0.12); color: #a7fff2; }
+.field-label { display: grid; gap: 6px; color: rgba(244, 239, 226, 0.72); font-size: 0.85rem; text-transform: uppercase; }
+input { width: 100%; border: 1px solid rgba(244, 239, 226, 0.22); border-radius: 6px; padding: 12px 13px; background: rgba(0, 0, 0, 0.38); color: var(--paper); outline: none; }
+input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(17, 197, 170, 0.14); }
+.command-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+button { border: 1px solid rgba(242, 193, 78, 0.45); border-radius: 6px; padding: 11px 12px; background: rgba(242, 193, 78, 0.14); color: var(--paper); font-weight: 800; }
+button:hover { border-color: var(--gold); background: rgba(242, 193, 78, 0.24); }
+.wide-command { width: 100%; background: rgba(17, 197, 170, 0.18); border-color: rgba(17, 197, 170, 0.55); }
+.lobby-list { border-top: 1px solid rgba(244, 239, 226, 0.12); padding-top: 12px; display: grid; gap: 8px; }
+.lobby-list-title { color: var(--gold); font-weight: 900; text-transform: uppercase; font-size: 0.82rem; }
+.lobby-list-rows { display: grid; gap: 7px; max-height: 180px; overflow: auto; }
+.lobby-row { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; text-align: left; }
+.lobby-row em { font-style: normal; color: #a7fff2; }
+.empty-list { font-size: 0.92rem; }
+
+.active-hud { position: absolute; inset: 0; pointer-events: none; }
+.top-strip { position: absolute; left: 18px; right: 18px; top: 14px; display: grid; grid-template-columns: minmax(210px, 1fr) auto minmax(210px, 1fr); gap: 14px; align-items: start; }
+.fighter-card, .round-chip { border: 1px solid rgba(244, 239, 226, 0.16); background: var(--panel); backdrop-filter: blur(8px); border-radius: 8px; padding: 12px; box-shadow: 0 16px 42px rgba(0, 0, 0, 0.28); }
+.fighter-card { display: grid; gap: 6px; min-width: 0; }
+.fighter-card strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.red-card { text-align: right; }
+.blue-card { border-color: rgba(56, 189, 248, 0.38); }
+.red-card { border-color: rgba(244, 63, 94, 0.38); }
+.meter { height: 10px; overflow: hidden; border-radius: 999px; background: rgba(244, 239, 226, 0.12); }
+.meter span { display: block; height: 100%; width: 0%; transition: width 120ms linear; }
+.hp span { background: linear-gradient(90deg, #10b981, #facc15, #f43f5e); }
+.power span { background: linear-gradient(90deg, #11c5aa, #38bdf8); }
+.round-chip { min-width: 150px; text-align: center; display: grid; gap: 2px; text-transform: uppercase; }
+.round-chip strong { font-size: 2rem; color: var(--gold); }
+.round-chip small { color: #a7fff2; }
+.controls-chip { position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); max-width: calc(100vw - 24px); padding: 9px 14px; border: 1px solid rgba(17, 197, 170, 0.34); border-radius: 999px; background: rgba(7, 9, 11, 0.72); color: rgba(244, 239, 226, 0.78); font-size: 0.88rem; white-space: nowrap; }
+.match-panel { position: absolute; left: 50%; top: 22%; transform: translateX(-50%); width: min(360px, calc(100vw - 32px)); display: grid; gap: 12px; padding: 18px; text-align: center; border: 1px solid var(--line); border-radius: 8px; background: var(--panel-strong); }
+.match-panel button { justify-self: center; min-width: 150px; }
+.event-banner { position: absolute; left: 50%; top: 36%; transform: translate(-50%, -50%); color: var(--gold); text-transform: uppercase; font-family: Impact, "Arial Black", sans-serif; font-size: clamp(4rem, 14vw, 9rem); line-height: 1; text-shadow: 0 8px 0 #050607, 0 0 32px rgba(242, 193, 78, 0.55); }
+.event-banner.fight { color: #a7fff2; text-shadow: 0 8px 0 #050607, 0 0 32px rgba(17, 197, 170, 0.55); opacity: 0.34; }
+.ended-panel h2 { margin: 0; color: var(--gold); text-transform: uppercase; }
+
+@media (max-width: 760px) {
+  .lobby-panel { top: 12px; left: 12px; width: calc(100vw - 24px); padding: 14px; }
+  .command-grid { grid-template-columns: 1fr; }
+  .top-strip { left: 8px; right: 8px; top: 8px; grid-template-columns: 1fr 82px 1fr; gap: 6px; }
+  .fighter-card, .round-chip { padding: 8px; font-size: 0.8rem; }
+  .round-chip { min-width: 82px; }
+  .round-chip strong { font-size: 1.3rem; }
+  .controls-chip { white-space: normal; width: calc(100vw - 18px); border-radius: 8px; text-align: center; bottom: 8px; font-size: 0.76rem; }
+  .event-banner { top: 44%; }
+}
