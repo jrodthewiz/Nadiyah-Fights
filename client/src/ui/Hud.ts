@@ -110,34 +110,35 @@ export class Hud {
     return `
       <section id="lobbyPanel" class="lobby-panel">
         <div class="fight-ticket" aria-hidden="true">
+          <span class="ui-sprite sprite-ticket"></span>
           <span>Underground Card</span>
           <strong>01</strong>
         </div>
         <div class="brand-lockup">
-          <div class="brand-mark">NF</div>
+          <div class="brand-mark"><span class="ui-sprite sprite-mask"></span></div>
           <div>
             <h1>Nadiyah Fights</h1>
             <p>Fast hands. Clean reads. One round at a time.</p>
           </div>
         </div>
-        <div class="status-pill" id="statusText">Offline</div>
+        <div class="status-pill"><span class="ui-sprite sprite-ready"></span><span id="statusText">Offline</span></div>
         <div class="fighter-card-preview" aria-hidden="true">
-          <div class="portrait-disc">N</div>
+          <div class="character-portrait portrait-nadiyah"></div>
           <div>
             <strong>Nadiyah</strong>
-            <span>Teal sash · hand-to-hand · duel ready</span>
+            <span>Teal sash - hand-to-hand - duel ready</span>
           </div>
         </div>
         <label class="field-label">Fighter name<input id="playerNameInput" maxlength="18" value="Nadiyah" /></label>
         <div class="command-grid">
-          <button id="hostButton" type="button">Host Lobby</button>
-          <button id="practiceButton" type="button">Practice Bot</button>
-          <button id="refreshButton" type="button">Browse Lobbies</button>
+          <button id="hostButton" type="button"><span class="ui-sprite sprite-ticket"></span><span>Host Lobby</span></button>
+          <button id="practiceButton" type="button"><span class="ui-sprite sprite-fist"></span><span>Practice Bot</span></button>
+          <button id="refreshButton" type="button"><span class="ui-sprite sprite-scroll"></span><span>Browse Lobbies</span></button>
         </div>
         <label class="field-label">Lobby code<input id="joinCodeInput" maxlength="8" placeholder="ABC123" /></label>
-        <button id="joinButton" class="wide-command" type="button">Join By Code</button>
+        <button id="joinButton" class="wide-command" type="button"><span class="ui-sprite sprite-code"></span><span>Join By Code</span></button>
         <div class="lobby-list">
-          <div class="lobby-list-title">Open Lobbies</div>
+          <div class="lobby-list-title"><span class="ui-sprite sprite-scroll"></span><span>Open Lobbies</span></div>
           <div id="lobbyListRows" class="lobby-list-rows"></div>
         </div>
       </section>
@@ -145,35 +146,40 @@ export class Hud {
       <section id="activeHud" class="active-hud">
         <div class="top-strip">
           <div class="fighter-card blue-card">
-            <strong id="blueName">Waiting</strong><span id="blueHpText">0 HP</span>
+            <span class="character-portrait portrait-nadiyah"></span>
+            <span class="fighter-card-copy"><strong id="blueName">Waiting</strong><span id="blueHpText">0 HP</span></span>
             <div class="meter hp"><span id="blueHpBar"></span></div>
             <div class="meter power"><span id="blueMeterBar"></span></div>
-            <small>Wins <b id="blueWins">0</b></small>
+            <small><span class="ui-sprite sprite-trophy"></span>Wins <b id="blueWins">0</b></small>
           </div>
           <div class="round-chip">
+            <span class="ui-sprite sprite-clock"></span>
             <span id="roundState">WAITING</span>
             <strong id="timerText">--</strong>
             <small id="roomCode">------</small>
           </div>
           <div class="fighter-card red-card">
-            <strong id="redName">Waiting</strong><span id="redHpText">0 HP</span>
+            <span class="character-portrait portrait-ember"></span>
+            <span class="fighter-card-copy"><strong id="redName">Waiting</strong><span id="redHpText">0 HP</span></span>
             <div class="meter hp"><span id="redHpBar"></span></div>
             <div class="meter power"><span id="redMeterBar"></span></div>
-            <small>Wins <b id="redWins">0</b></small>
+            <small><span class="ui-sprite sprite-trophy"></span>Wins <b id="redWins">0</b></small>
           </div>
         </div>
-        <div class="controls-chip">A/D move · W/Space jump · Shift dash · S block · J light · K heavy · L kick</div>
+        <div class="controls-chip"><span class="ui-sprite sprite-fist"></span><span>A/D move - W/Space jump - Shift dash - S block - J light - K heavy - L kick</span></div>
       </section>
 
       <section id="waitingPanel" class="match-panel">
+        <span class="ui-sprite sprite-ready panel-sprite"></span>
         <p id="waitingText">Waiting for a rival.</p>
-        <button id="readyButton" type="button"><span id="readyButtonLabel">Mark Ready</span></button>
+        <button id="readyButton" type="button"><span class="ui-sprite sprite-ready"></span><span id="readyButtonLabel">Mark Ready</span></button>
       </section>
       <div id="countdownBanner" class="event-banner">Ready?</div>
       <div id="fightBanner" class="event-banner fight">Fight</div>
       <section id="endedPanel" class="match-panel ended-panel">
+        <span class="ui-sprite sprite-trophy panel-sprite"></span>
         <h2 id="winnerText">Round complete</h2>
-        <button id="rematchButton" type="button">Rematch</button>
+        <button id="rematchButton" type="button"><span class="ui-sprite sprite-rematch"></span><span>Rematch</span></button>
       </section>
     `;
   }
@@ -205,7 +211,7 @@ export class Hud {
       const row = document.createElement("button");
       row.type = "button";
       row.className = "lobby-row";
-      row.innerHTML = `<strong>${lobby.code}</strong><span>${lobby.hostName}</span><em>${lobby.playerCount}/${lobby.maxPlayers}</em>`;
+      row.innerHTML = `<span class="ui-sprite sprite-ticket"></span><strong>${lobby.code}</strong><span>${lobby.hostName}</span><em>${lobby.playerCount}/${lobby.maxPlayers}</em>`;
       row.addEventListener("click", () => this.callbacks?.joinLobby(lobby.code, this.playerName()));
       container.appendChild(row);
     }

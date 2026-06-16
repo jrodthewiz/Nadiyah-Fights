@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="384" height="128" viewBox="0 0 384 128">
+  <title>Nadiyah Fights UI Sprite Sheet</title>
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="3" stdDeviation="2" flood-color="#020304" flood-opacity=".75"/>
+    </filter>
+    <linearGradient id="gold" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#ffe08a"/>
+      <stop offset=".55" stop-color="#f2c14e"/>
+      <stop offset="1" stop-color="#8a6219"/>
+    </linearGradient>
+    <linearGradient id="teal" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#8fffee"/>
+      <stop offset="1" stop-color="#11c5aa"/>
+    </linearGradient>
+    <linearGradient id="red" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#ffb0bd"/>
+      <stop offset="1" stop-color="#f43f5e"/>
+    </linearGradient>
+  </defs>
+
+  <g filter="url(#shadow)">
+    <g transform="translate(0 0)">
+      <rect x="7" y="11" width="50" height="42" rx="7" fill="#0b0f12" stroke="url(#gold)" stroke-width="3"/>
+      <path d="M18 35h28l7 9H20z" fill="url(#gold)"/>
+      <path d="M20 22h21l5 8H17z" fill="#f4efe2" opacity=".85"/>
+    </g>
+    <g transform="translate(64 0)">
+      <circle cx="32" cy="32" r="24" fill="#0b0f12" stroke="url(#teal)" stroke-width="4"/>
+      <path d="M21 39c7-14 15-14 22 0M20 25c8 5 16 5 24 0" fill="none" stroke="url(#teal)" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="25" cy="30" r="3" fill="#f2c14e"/>
+      <circle cx="39" cy="30" r="3" fill="#f2c14e"/>
+    </g>
+    <g transform="translate(128 0)">
+      <path d="M16 44c0-18 5-27 15-27h5c10 0 14 9 12 27z" fill="#0b0f12" stroke="url(#gold)" stroke-width="4"/>
+      <path d="M22 44c1 9 20 9 22 0" fill="none" stroke="#f4efe2" stroke-width="4" stroke-linecap="round"/>
+      <path d="M24 25h18" stroke="url(#teal)" stroke-width="5" stroke-linecap="round"/>
+    </g>
+    <g transform="translate(192 0)">
+      <circle cx="32" cy="32" r="25" fill="#0b0f12" stroke="url(#teal)" stroke-width="4"/>
+      <path d="M32 15v18l12 9" fill="none" stroke="#f4efe2" stroke-width="5" stroke-linecap="round"/>
+      <path d="M20 9h24" stroke="url(#gold)" stroke-width="5" stroke-linecap="round"/>
+    </g>
+    <g transform="translate(256 0)">
+      <path d="M22 15h20l-3 28H25z" fill="#0b0f12" stroke="url(#red)" stroke-width="4"/>
+      <path d="M26 21l-12 8M38 21l12 8M27 43l-7 9M37 43l7 9" stroke="#f4efe2" stroke-width="5" stroke-linecap="round"/>
+    </g>
+    <g transform="translate(320 0)">
+      <path d="M16 20h32v26H16z" fill="#0b0f12" stroke="url(#gold)" stroke-width="4"/>
+      <path d="M21 29h22M21 38h15" stroke="url(#teal)" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="45" cy="47" r="8" fill="url(#gold)"/>
+    </g>
+    <g transform="translate(0 64)">
+      <path d="M15 38l12-23h10l12 23-17 13z" fill="#0b0f12" stroke="url(#gold)" stroke-width="4"/>
+      <path d="M24 38h16M32 19v28" stroke="url(#teal)" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    <g transform="translate(64 64)">
+      <path d="M18 41c7-22 21-22 28 0" fill="#0b0f12" stroke="url(#teal)" stroke-width="4"/>
+      <path d="M19 43h26" stroke="url(#gold)" stroke-width="5" stroke-linecap="round"/>
+      <path d="M26 29h12" stroke="#f4efe2" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    <g transform="translate(128 64)">
+      <path d="M19 44h26l7-22H12z" fill="#0b0f12" stroke="url(#gold)" stroke-width="4"/>
+      <path d="M24 21l4-8h8l4 8" stroke="url(#teal)" stroke-width="4" stroke-linecap="round"/>
+      <path d="M23 34h18" stroke="#f4efe2" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    <g transform="translate(192 64)">
+      <path d="M16 31c0-12 7-20 16-20s16 8 16 20c0 14-16 25-16 25S16 45 16 31z" fill="#0b0f12" stroke="url(#red)" stroke-width="4"/>
+      <path d="M24 32h16" stroke="#f4efe2" stroke-width="5" stroke-linecap="round"/>
+    </g>
+    <g transform="translate(256 64)">
+      <path d="M12 42l16-24h8l16 24z" fill="#0b0f12" stroke="url(#teal)" stroke-width="4"/>
+      <path d="M23 42l9-13 9 13" fill="none" stroke="url(#gold)" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    <g transform="translate(320 64)">
+      <path d="M15 18h34v20H15z" fill="#0b0f12" stroke="url(#gold)" stroke-width="4"/>
+      <path d="M23 38h18v11H23z" fill="#0b0f12" stroke="url(#teal)" stroke-width="4"/>
+      <path d="M22 27h20" stroke="#f4efe2" stroke-width="4" stroke-linecap="round"/>
+    </g>
+  </g>
+</svg>
