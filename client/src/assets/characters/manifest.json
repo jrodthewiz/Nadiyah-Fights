@@ -1,0 +1,765 @@
+{
+  "version": 1,
+  "frame": {
+    "width": 160,
+    "height": 192
+  },
+  "columns": 8,
+  "rows": 10,
+  "totalFrames": 80,
+  "animationOrder": [
+    "idle",
+    "walkForward",
+    "walkBack",
+    "crouch",
+    "jump",
+    "dashForward",
+    "lightPunch",
+    "heavyPunch",
+    "kick",
+    "blockHigh",
+    "hitStun",
+    "knockdown",
+    "getUp",
+    "victory",
+    "ko"
+  ],
+  "variants": [
+    {
+      "id": "nadiyah",
+      "label": "Nadiyah",
+      "sheet": "nadiyah.svg",
+      "frame": {
+        "width": 160,
+        "height": 192
+      },
+      "columns": 8,
+      "rows": 10,
+      "totalFrames": 80,
+      "animations": {
+        "idle": {
+          "frames": [
+            "idle_00",
+            "idle_01",
+            "idle_02",
+            "idle_03",
+            "idle_04",
+            "idle_05"
+          ],
+          "fps": 8,
+          "loop": true
+        },
+        "walkForward": {
+          "frames": [
+            "walkForward_00",
+            "walkForward_01",
+            "walkForward_02",
+            "walkForward_03",
+            "walkForward_04",
+            "walkForward_05",
+            "walkForward_06",
+            "walkForward_07"
+          ],
+          "fps": 13,
+          "loop": true
+        },
+        "walkBack": {
+          "frames": [
+            "walkBack_00",
+            "walkBack_01",
+            "walkBack_02",
+            "walkBack_03",
+            "walkBack_04",
+            "walkBack_05",
+            "walkBack_06",
+            "walkBack_07"
+          ],
+          "fps": 12,
+          "loop": true
+        },
+        "crouch": {
+          "frames": [
+            "crouch_00",
+            "crouch_01",
+            "crouch_02"
+          ],
+          "fps": 9,
+          "loop": false
+        },
+        "jump": {
+          "frames": [
+            "jump_00",
+            "jump_01",
+            "jump_02",
+            "jump_03",
+            "jump_04"
+          ],
+          "fps": 11,
+          "loop": false
+        },
+        "dashForward": {
+          "frames": [
+            "dashForward_00",
+            "dashForward_01",
+            "dashForward_02",
+            "dashForward_03",
+            "dashForward_04"
+          ],
+          "fps": 16,
+          "loop": false
+        },
+        "lightPunch": {
+          "frames": [
+            "lightPunch_00",
+            "lightPunch_01",
+            "lightPunch_02",
+            "lightPunch_03",
+            "lightPunch_04"
+          ],
+          "fps": 18,
+          "loop": false
+        },
+        "heavyPunch": {
+          "frames": [
+            "heavyPunch_00",
+            "heavyPunch_01",
+            "heavyPunch_02",
+            "heavyPunch_03",
+            "heavyPunch_04",
+            "heavyPunch_05"
+          ],
+          "fps": 15,
+          "loop": false
+        },
+        "kick": {
+          "frames": [
+            "kick_00",
+            "kick_01",
+            "kick_02",
+            "kick_03",
+            "kick_04",
+            "kick_05"
+          ],
+          "fps": 15,
+          "loop": false
+        },
+        "blockHigh": {
+          "frames": [
+            "blockHigh_00",
+            "blockHigh_01",
+            "blockHigh_02"
+          ],
+          "fps": 10,
+          "loop": false
+        },
+        "hitStun": {
+          "frames": [
+            "hitStun_00",
+            "hitStun_01",
+            "hitStun_02",
+            "hitStun_03"
+          ],
+          "fps": 13,
+          "loop": false
+        },
+        "knockdown": {
+          "frames": [
+            "knockdown_00",
+            "knockdown_01",
+            "knockdown_02",
+            "knockdown_03",
+            "knockdown_04"
+          ],
+          "fps": 12,
+          "loop": false
+        },
+        "getUp": {
+          "frames": [
+            "getUp_00",
+            "getUp_01",
+            "getUp_02",
+            "getUp_03",
+            "getUp_04"
+          ],
+          "fps": 12,
+          "loop": false
+        },
+        "victory": {
+          "frames": [
+            "victory_00",
+            "victory_01",
+            "victory_02",
+            "victory_03",
+            "victory_04",
+            "victory_05"
+          ],
+          "fps": 9,
+          "loop": true
+        },
+        "ko": {
+          "frames": [
+            "ko_00",
+            "ko_01",
+            "ko_02",
+            "ko_03",
+            "ko_04"
+          ],
+          "fps": 10,
+          "loop": false
+        }
+      }
+    },
+    {
+      "id": "ember",
+      "label": "Ember",
+      "sheet": "ember.svg",
+      "frame": {
+        "width": 160,
+        "height": 192
+      },
+      "columns": 8,
+      "rows": 10,
+      "totalFrames": 80,
+      "animations": {
+        "idle": {
+          "frames": [
+            "idle_00",
+            "idle_01",
+            "idle_02",
+            "idle_03",
+            "idle_04",
+            "idle_05"
+          ],
+          "fps": 8,
+          "loop": true
+        },
+        "walkForward": {
+          "frames": [
+            "walkForward_00",
+            "walkForward_01",
+            "walkForward_02",
+            "walkForward_03",
+            "walkForward_04",
+            "walkForward_05",
+            "walkForward_06",
+            "walkForward_07"
+          ],
+          "fps": 13,
+          "loop": true
+        },
+        "walkBack": {
+          "frames": [
+            "walkBack_00",
+            "walkBack_01",
+            "walkBack_02",
+            "walkBack_03",
+            "walkBack_04",
+            "walkBack_05",
+            "walkBack_06",
+            "walkBack_07"
+          ],
+          "fps": 12,
+          "loop": true
+        },
+        "crouch": {
+          "frames": [
+            "crouch_00",
+            "crouch_01",
+            "crouch_02"
+          ],
+          "fps": 9,
+          "loop": false
+        },
+        "jump": {
+          "frames": [
+            "jump_00",
+            "jump_01",
+            "jump_02",
+            "jump_03",
+            "jump_04"
+          ],
+          "fps": 11,
+          "loop": false
+        },
+        "dashForward": {
+          "frames": [
+            "dashForward_00",
+            "dashForward_01",
+            "dashForward_02",
+            "dashForward_03",
+            "dashForward_04"
+          ],
+          "fps": 16,
+          "loop": false
+        },
+        "lightPunch": {
+          "frames": [
+            "lightPunch_00",
+            "lightPunch_01",
+            "lightPunch_02",
+            "lightPunch_03",
+            "lightPunch_04"
+          ],
+          "fps": 18,
+          "loop": false
+        },
+        "heavyPunch": {
+          "frames": [
+            "heavyPunch_00",
+            "heavyPunch_01",
+            "heavyPunch_02",
+            "heavyPunch_03",
+            "heavyPunch_04",
+            "heavyPunch_05"
+          ],
+          "fps": 15,
+          "loop": false
+        },
+        "kick": {
+          "frames": [
+            "kick_00",
+            "kick_01",
+            "kick_02",
+            "kick_03",
+            "kick_04",
+            "kick_05"
+          ],
+          "fps": 15,
+          "loop": false
+        },
+        "blockHigh": {
+          "frames": [
+            "blockHigh_00",
+            "blockHigh_01",
+            "blockHigh_02"
+          ],
+          "fps": 10,
+          "loop": false
+        },
+        "hitStun": {
+          "frames": [
+            "hitStun_00",
+            "hitStun_01",
+            "hitStun_02",
+            "hitStun_03"
+          ],
+          "fps": 13,
+          "loop": false
+        },
+        "knockdown": {
+          "frames": [
+            "knockdown_00",
+            "knockdown_01",
+            "knockdown_02",
+            "knockdown_03",
+            "knockdown_04"
+          ],
+          "fps": 12,
+          "loop": false
+        },
+        "getUp": {
+          "frames": [
+            "getUp_00",
+            "getUp_01",
+            "getUp_02",
+            "getUp_03",
+            "getUp_04"
+          ],
+          "fps": 12,
+          "loop": false
+        },
+        "victory": {
+          "frames": [
+            "victory_00",
+            "victory_01",
+            "victory_02",
+            "victory_03",
+            "victory_04",
+            "victory_05"
+          ],
+          "fps": 9,
+          "loop": true
+        },
+        "ko": {
+          "frames": [
+            "ko_00",
+            "ko_01",
+            "ko_02",
+            "ko_03",
+            "ko_04"
+          ],
+          "fps": 10,
+          "loop": false
+        }
+      }
+    },
+    {
+      "id": "violet",
+      "label": "Violet",
+      "sheet": "violet.svg",
+      "frame": {
+        "width": 160,
+        "height": 192
+      },
+      "columns": 8,
+      "rows": 10,
+      "totalFrames": 80,
+      "animations": {
+        "idle": {
+          "frames": [
+            "idle_00",
+            "idle_01",
+            "idle_02",
+            "idle_03",
+            "idle_04",
+            "idle_05"
+          ],
+          "fps": 8,
+          "loop": true
+        },
+        "walkForward": {
+          "frames": [
+            "walkForward_00",
+            "walkForward_01",
+            "walkForward_02",
+            "walkForward_03",
+            "walkForward_04",
+            "walkForward_05",
+            "walkForward_06",
+            "walkForward_07"
+          ],
+          "fps": 13,
+          "loop": true
+        },
+        "walkBack": {
+          "frames": [
+            "walkBack_00",
+            "walkBack_01",
+            "walkBack_02",
+            "walkBack_03",
+            "walkBack_04",
+            "walkBack_05",
+            "walkBack_06",
+            "walkBack_07"
+          ],
+          "fps": 12,
+          "loop": true
+        },
+        "crouch": {
+          "frames": [
+            "crouch_00",
+            "crouch_01",
+            "crouch_02"
+          ],
+          "fps": 9,
+          "loop": false
+        },
+        "jump": {
+          "frames": [
+            "jump_00",
+            "jump_01",
+            "jump_02",
+            "jump_03",
+            "jump_04"
+          ],
+          "fps": 11,
+          "loop": false
+        },
+        "dashForward": {
+          "frames": [
+            "dashForward_00",
+            "dashForward_01",
+            "dashForward_02",
+            "dashForward_03",
+            "dashForward_04"
+          ],
+          "fps": 16,
+          "loop": false
+        },
+        "lightPunch": {
+          "frames": [
+            "lightPunch_00",
+            "lightPunch_01",
+            "lightPunch_02",
+            "lightPunch_03",
+            "lightPunch_04"
+          ],
+          "fps": 18,
+          "loop": false
+        },
+        "heavyPunch": {
+          "frames": [
+            "heavyPunch_00",
+            "heavyPunch_01",
+            "heavyPunch_02",
+            "heavyPunch_03",
+            "heavyPunch_04",
+            "heavyPunch_05"
+          ],
+          "fps": 15,
+          "loop": false
+        },
+        "kick": {
+          "frames": [
+            "kick_00",
+            "kick_01",
+            "kick_02",
+            "kick_03",
+            "kick_04",
+            "kick_05"
+          ],
+          "fps": 15,
+          "loop": false
+        },
+        "blockHigh": {
+          "frames": [
+            "blockHigh_00",
+            "blockHigh_01",
+            "blockHigh_02"
+          ],
+          "fps": 10,
+          "loop": false
+        },
+        "hitStun": {
+          "frames": [
+            "hitStun_00",
+            "hitStun_01",
+            "hitStun_02",
+            "hitStun_03"
+          ],
+          "fps": 13,
+          "loop": false
+        },
+        "knockdown": {
+          "frames": [
+            "knockdown_00",
+            "knockdown_01",
+            "knockdown_02",
+            "knockdown_03",
+            "knockdown_04"
+          ],
+          "fps": 12,
+          "loop": false
+        },
+        "getUp": {
+          "frames": [
+            "getUp_00",
+            "getUp_01",
+            "getUp_02",
+            "getUp_03",
+            "getUp_04"
+          ],
+          "fps": 12,
+          "loop": false
+        },
+        "victory": {
+          "frames": [
+            "victory_00",
+            "victory_01",
+            "victory_02",
+            "victory_03",
+            "victory_04",
+            "victory_05"
+          ],
+          "fps": 9,
+          "loop": true
+        },
+        "ko": {
+          "frames": [
+            "ko_00",
+            "ko_01",
+            "ko_02",
+            "ko_03",
+            "ko_04"
+          ],
+          "fps": 10,
+          "loop": false
+        }
+      }
+    },
+    {
+      "id": "frost",
+      "label": "Frost",
+      "sheet": "frost.svg",
+      "frame": {
+        "width": 160,
+        "height": 192
+      },
+      "columns": 8,
+      "rows": 10,
+      "totalFrames": 80,
+      "animations": {
+        "idle": {
+          "frames": [
+            "idle_00",
+            "idle_01",
+            "idle_02",
+            "idle_03",
+            "idle_04",
+            "idle_05"
+          ],
+          "fps": 8,
+          "loop": true
+        },
+        "walkForward": {
+          "frames": [
+            "walkForward_00",
+            "walkForward_01",
+            "walkForward_02",
+            "walkForward_03",
+            "walkForward_04",
+            "walkForward_05",
+            "walkForward_06",
+            "walkForward_07"
+          ],
+          "fps": 13,
+          "loop": true
+        },
+        "walkBack": {
+          "frames": [
+            "walkBack_00",
+            "walkBack_01",
+            "walkBack_02",
+            "walkBack_03",
+            "walkBack_04",
+            "walkBack_05",
+            "walkBack_06",
+            "walkBack_07"
+          ],
+          "fps": 12,
+          "loop": true
+        },
+        "crouch": {
+          "frames": [
+            "crouch_00",
+            "crouch_01",
+            "crouch_02"
+          ],
+          "fps": 9,
+          "loop": false
+        },
+        "jump": {
+          "frames": [
+            "jump_00",
+            "jump_01",
+            "jump_02",
+            "jump_03",
+            "jump_04"
+          ],
+          "fps": 11,
+          "loop": false
+        },
+        "dashForward": {
+          "frames": [
+            "dashForward_00",
+            "dashForward_01",
+            "dashForward_02",
+            "dashForward_03",
+            "dashForward_04"
+          ],
+          "fps": 16,
+          "loop": false
+        },
+        "lightPunch": {
+          "frames": [
+            "lightPunch_00",
+            "lightPunch_01",
+            "lightPunch_02",
+            "lightPunch_03",
+            "lightPunch_04"
+          ],
+          "fps": 18,
+          "loop": false
+        },
+        "heavyPunch": {
+          "frames": [
+            "heavyPunch_00",
+            "heavyPunch_01",
+            "heavyPunch_02",
+            "heavyPunch_03",
+            "heavyPunch_04",
+            "heavyPunch_05"
+          ],
+          "fps": 15,
+          "loop": false
+        },
+        "kick": {
+          "frames": [
+            "kick_00",
+            "kick_01",
+            "kick_02",
+            "kick_03",
+            "kick_04",
+            "kick_05"
+          ],
+          "fps": 15,
+          "loop": false
+        },
+        "blockHigh": {
+          "frames": [
+            "blockHigh_00",
+            "blockHigh_01",
+            "blockHigh_02"
+          ],
+          "fps": 10,
+          "loop": false
+        },
+        "hitStun": {
+          "frames": [
+            "hitStun_00",
+            "hitStun_01",
+            "hitStun_02",
+            "hitStun_03"
+          ],
+          "fps": 13,
+          "loop": false
+        },
+        "knockdown": {
+          "frames": [
+            "knockdown_00",
+            "knockdown_01",
+            "knockdown_02",
+            "knockdown_03",
+            "knockdown_04"
+          ],
+          "fps": 12,
+          "loop": false
+        },
+        "getUp": {
+          "frames": [
+            "getUp_00",
+            "getUp_01",
+            "getUp_02",
+            "getUp_03",
+            "getUp_04"
+          ],
+          "fps": 12,
+          "loop": false
+        },
+        "victory": {
+          "frames": [
+            "victory_00",
+            "victory_01",
+            "victory_02",
+            "victory_03",
+            "victory_04",
+            "victory_05"
+          ],
+          "fps": 9,
+          "loop": true
+        },
+        "ko": {
+          "frames": [
+            "ko_00",
+            "ko_01",
+            "ko_02",
+            "ko_03",
+            "ko_04"
+          ],
+          "fps": 10,
+          "loop": false
+        }
+      }
+    }
+  ]
+}

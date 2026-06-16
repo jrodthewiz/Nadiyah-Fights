@@ -4,7 +4,15 @@ import { ARENA } from "@shared/game/constants";
 import { INPUT_BITS } from "@shared/game/input";
 import { CLIENT_MESSAGES } from "@shared/game/messages";
 import type { CombatEvent, FighterAction, InputPayload } from "@shared/game/types";
-import { animationFor, defaultTextureKey, registerProceduralSprites } from "./proceduralSprites";
+import {
+  animationFor,
+  defaultFrameName,
+  preloadCharacterSheets,
+  registerCharacterSheets,
+  textureKeyFor,
+  variantForFighter,
+  type CharacterVariantId,
+} from "./characterSprites";
 
 type FighterView = {
   id: string;
@@ -12,10 +20,12 @@ type FighterView = {
   teamId: string;
   x: number;
   y: number;
+  vx: number;
   facing: number;
   hp: number;
   action: FighterAction;
   attackId: string;
+  isBot?: boolean;
 };
 
 type RoomLike = Room<unknown> & {
@@ -49,8 +59,12 @@ export class GameScene extends Phaser.Scene {
     super("GameScene");
   }
 
+  preload(): void {
+    preloadCharacterSheets(this);
+  }
+
   create(): void {
-    registerProceduralSprites(this);
+    registerCharacterSheets(this);
     this.drawArena();
     this.createMenuShowcase();
     this.effects = this.add.graphics();
@@ -139,10 +153,12 @@ export class GameScene extends Phaser.Scene {
   }
 
   private createMenuShowcase(): void {
-    const left = this.add.sprite(760, ARENA.floorY, defaultTextureKey).setOrigin(0.5, 0.94).setScale(1.9);
-    const right = this.add.sprite(950, ARENA.floorY, defaultTextureKey).setOrigin(0.5, 0.94).setScale(1.9).setFlipX(true).setTint(0xffd5dc);
-    left.play("nadiyah:idle");
-    right.play("nadiyah:walk");
+    const left = this.add.sprite(734, ARENA.floorY, textureKeyFor("nadiyah"), defaultFrameName).setOrigin(0.5, 0.94).setScale(1.72);
+    const middle = this.add.sprite(884, ARENA.floorY, textureKeyFor("violet"), defaultFrameName).setOrigin(0.5, 0.94).setScale(1.58).setFlipX(true);
+    const right = this.add.sprite(1028, ARENA.floorY, textureKeyFor("ember"), defaultFrameName).setOrigin(0.5, 0.94).setScale(1.72).setFlipX(true);
+    left.play("fighter:nadiyah:idle");
+    middle.play("fighter:violet:blockHigh");
+    right.play("fighter:ember:walkForward");
     const leftName = this.add.text(760, ARENA.floorY - 252, "NADIYAH", {
       fontFamily: "Arial Black, Arial, sans-serif",
       fontSize: "22px",
@@ -150,7 +166,14 @@ export class GameScene extends Phaser.Scene {
       stroke: "#050607",
       strokeThickness: 5,
     }).setOrigin(0.5);
-    const rightName = this.add.text(950, ARENA.floorY - 252, "RIVAL", {
+    const midName = this.add.text(884, ARENA.floorY - 244, "VIOLET", {
+      fontFamily: "Arial Black, Arial, sans-serif",
+      fontSize: "18px",
+      color: "#d8b4fe",
+      stroke: "#050607",
+      strokeThickness: 5,
+    }).setOrigin(0.5);
+    const rightName = this.add.text(1028, ARENA.floorY - 252, "EMBER", {
       fontFamily: "Arial Black, Arial, sans-serif",
       fontSize: "22px",
       color: "#ff9daf",
@@ -159,7 +182,7 @@ export class GameScene extends Phaser.Scene {
     }).setOrigin(0.5);
     const spark = this.add.circle(855, ARENA.floorY - 118, 20, 0xf2c14e, 0.34).setStrokeStyle(3, 0xffffff, 0.42);
     this.tweens.add({ targets: spark, scale: 1.55, alpha: 0.08, duration: 720, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
-    this.menuShowcase = [left, right, leftName, rightName, spark];
+    this.menuShowcase = [left, middle, right, leftName, midName, rightName, spark];
   }
 
   private setMenuShowcaseVisible(visible: boolean): void {
@@ -176,11 +199,13 @@ export class GameScene extends Phaser.Scene {
     for (const fighter of fighters) {
       seen.add(fighter.id);
       let sprite = this.sprites.get(fighter.id);
+      const variantId = variantForFighter(fighter.teamId, fighter.isBot === true, fighter.id);
       if (!sprite) {
-        sprite = this.add.sprite(fighter.x, fighter.y - 80, defaultTextureKey);
+        sprite = this.add.sprite(fighter.x, fighter.y - 80, textureKeyFor(variantId), defaultFrameName);
         sprite.setData("fighter", true);
+        sprite.setData("variantId", variantId);
         sprite.setOrigin(0.5, 0.94);
-        sprite.setScale(1.15);
+        sprite.setScale(1.22);
         this.sprites.set(fighter.id, sprite);
         const label = this.add.text(fighter.x, fighter.y - 168, fighter.name, {
           fontFamily: "Arial, sans-serif",
@@ -192,11 +217,20 @@ export class GameScene extends Phaser.Scene {
         label.setData("fighter", true);
         this.nameTags.set(fighter.id, label);
       }
+      if (sprite.getData("variantId") !== variantId) {
+        sprite.setTexture(textureKeyFor(variantId), defaultFrameName);
+        sprite.setData("variantId", variantId);
+      }
       sprite.x = Phaser.Math.Linear(sprite.x, fighter.x, 0.36);
       sprite.y = Phaser.Math.Linear(sprite.y, fighter.y, 0.36);
       sprite.setFlipX(fighter.facing < 0);
-      sprite.setTint(fighter.teamId === "blue" ? 0xffffff : 0xffd5dc);
-      const animKey = animationFor(fighter.action, fighter.attackId);
+      sprite.clearTint();
+      const animKey = animationFor(variantId as CharacterVariantId, {
+        action: fighter.action,
+        attackId: fighter.attackId as Parameters<typeof animationFor>[1]["attackId"],
+        vx: fighter.vx,
+        facing: fighter.facing,
+      });
       if (sprite.anims.currentAnim?.key !== animKey) sprite.play(animKey, true);
       const label = this.nameTags.get(fighter.id);
       if (label) {
