@@ -20,8 +20,8 @@ const ACTION_FRAMES: Record<string, number> = {
   ko: 4,
 };
 
-const limb = (graphics: Phaser.GameObjects.Graphics, x1: number, y1: number, x2: number, y2: number, color = 0x111317): void => {
-  graphics.lineStyle(8, color, 1);
+const limb = (graphics: Phaser.GameObjects.Graphics, x1: number, y1: number, x2: number, y2: number, color = 0x050607): void => {
+  graphics.lineStyle(9, color, 1);
   graphics.beginPath();
   graphics.moveTo(x1, y1);
   graphics.lineTo(x2, y2);
@@ -36,7 +36,7 @@ const drawFrame = (graphics: Phaser.GameObjects.Graphics, action: string, frame:
   const hipY = floor - 58 + bob;
   const chestY = floor - 102 + bob;
   const headY = floor - 128 + bob;
-  const accent = 0x11c5aa;
+  const accent = 0x1fffe0;
   const gold = 0xf2c14e;
   let lean = 0;
   let armReach = 0;
@@ -49,12 +49,12 @@ const drawFrame = (graphics: Phaser.GameObjects.Graphics, action: string, frame:
   if (action === "hitstun") lean = -18;
   if (action === "block" || action === "blockstun") lean = -6;
   if (action === "ko" || action === "knockdown") {
-    graphics.lineStyle(8, 0x111317, 1);
+    graphics.lineStyle(9, 0x050607, 1);
     limb(graphics, cx - 42, floor - 18, cx + 42, floor - 26);
     limb(graphics, cx - 12, floor - 22, cx + 18, floor - 54);
     limb(graphics, cx + 18, floor - 54, cx + 44, floor - 58);
     limb(graphics, cx - 14, floor - 24, cx - 42, floor - 42);
-    graphics.fillStyle(0x111317, 1);
+    graphics.fillStyle(0x050607, 1);
     graphics.fillCircle(cx + 48, floor - 60, 16);
     graphics.lineStyle(5, accent, 1);
     graphics.beginPath();
@@ -64,7 +64,7 @@ const drawFrame = (graphics: Phaser.GameObjects.Graphics, action: string, frame:
     return;
   }
 
-  graphics.fillStyle(0x111317, 1);
+  graphics.fillStyle(0x050607, 1);
   graphics.fillCircle(cx + lean, headY, 17);
   graphics.lineStyle(5, accent, 1);
   graphics.beginPath();

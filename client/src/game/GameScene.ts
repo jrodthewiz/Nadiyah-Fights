@@ -43,6 +43,7 @@ export class GameScene extends Phaser.Scene {
   private lastButtons = -1;
   private nextSendAt = 0;
   private effects: Phaser.GameObjects.Graphics | null = null;
+  private menuShowcase: Phaser.GameObjects.GameObject[] = [];
 
   constructor() {
     super("GameScene");
@@ -51,6 +52,7 @@ export class GameScene extends Phaser.Scene {
   create(): void {
     registerProceduralSprites(this);
     this.drawArena();
+    this.createMenuShowcase();
     this.effects = this.add.graphics();
     this.cameras.main.setBounds(0, 0, ARENA.width, ARENA.height);
     this.cameras.main.centerOn(ARENA.width / 2, ARENA.height / 2);
@@ -88,27 +90,88 @@ export class GameScene extends Phaser.Scene {
 
   private drawArena(): void {
     const g = this.add.graphics();
-    g.fillGradientStyle(0x17202a, 0x17202a, 0x2d1b34, 0x10251f, 1);
+    g.fillGradientStyle(0x111821, 0x111821, 0x24162f, 0x06231f, 1);
     g.fillRect(0, 0, ARENA.width, ARENA.height);
+    g.fillStyle(0x081012, 0.72);
+    g.fillRoundedRect(82, 78, 1116, 130, 12);
+    g.lineStyle(2, 0xf2c14e, 0.34);
+    g.strokeRoundedRect(82, 78, 1116, 130, 12);
+    g.fillStyle(0x0b0e13, 0.62);
+    for (let index = 0; index < 24; index += 1) {
+      const x = index * 58;
+      const height = 36 + (index % 5) * 14;
+      g.fillRect(x, ARENA.floorY - 114 - height, 44, height);
+    }
+    g.lineStyle(3, 0x11c5aa, 0.24);
+    for (let index = 0; index < 12; index += 1) {
+      const x = 120 + index * 96;
+      g.beginPath();
+      g.moveTo(x, 250);
+      g.lineTo(x + 190, 98);
+      g.strokePath();
+    }
     g.fillStyle(0x18211e, 1);
     g.fillRect(0, ARENA.floorY, ARENA.width, ARENA.height - ARENA.floorY);
+    g.fillGradientStyle(0x17231f, 0x17231f, 0x0d1413, 0x0d1413, 1);
+    g.fillRect(0, ARENA.floorY + 4, ARENA.width, ARENA.height - ARENA.floorY - 4);
     g.lineStyle(4, 0xf2c14e, 0.85);
     g.lineBetween(ARENA.leftWall, ARENA.floorY, ARENA.rightWall, ARENA.floorY);
     g.lineStyle(1, 0x11c5aa, 0.25);
     for (let x = ARENA.leftWall; x <= ARENA.rightWall; x += 80) g.lineBetween(x, ARENA.floorY, x + 48, ARENA.floorY + 60);
-    g.fillStyle(0x0b1114, 0.55);
-    g.fillRoundedRect(96, 92, 1088, 92, 8);
+    g.lineStyle(8, 0x111317, 0.7);
+    g.strokeCircle(ARENA.width / 2, ARENA.floorY - 126, 86);
+    g.lineStyle(3, 0xf2c14e, 0.5);
+    g.strokeCircle(ARENA.width / 2, ARENA.floorY - 126, 72);
     this.add.text(ARENA.width / 2, 132, "NADIYAH FIGHTS", {
       fontFamily: "Impact, Arial Black, sans-serif",
-      fontSize: "54px",
+      fontSize: "64px",
       color: "#f2c14e",
       stroke: "#050607",
-      strokeThickness: 7,
+      strokeThickness: 8,
+    }).setOrigin(0.5).setAlpha(0.92);
+    this.add.text(ARENA.width / 2, 194, "INKED HAND-TO-HAND TOURNAMENT", {
+      fontFamily: "Arial Black, Arial, sans-serif",
+      fontSize: "18px",
+      color: "#a7fff2",
+      stroke: "#050607",
+      strokeThickness: 4,
+    }).setOrigin(0.5).setAlpha(0.82);
+  }
+
+  private createMenuShowcase(): void {
+    const left = this.add.sprite(760, ARENA.floorY, defaultTextureKey).setOrigin(0.5, 0.94).setScale(1.9);
+    const right = this.add.sprite(950, ARENA.floorY, defaultTextureKey).setOrigin(0.5, 0.94).setScale(1.9).setFlipX(true).setTint(0xffd5dc);
+    left.play("nadiyah:idle");
+    right.play("nadiyah:walk");
+    const leftName = this.add.text(760, ARENA.floorY - 252, "NADIYAH", {
+      fontFamily: "Arial Black, Arial, sans-serif",
+      fontSize: "22px",
+      color: "#a7fff2",
+      stroke: "#050607",
+      strokeThickness: 5,
     }).setOrigin(0.5);
+    const rightName = this.add.text(950, ARENA.floorY - 252, "RIVAL", {
+      fontFamily: "Arial Black, Arial, sans-serif",
+      fontSize: "22px",
+      color: "#ff9daf",
+      stroke: "#050607",
+      strokeThickness: 5,
+    }).setOrigin(0.5);
+    const spark = this.add.circle(855, ARENA.floorY - 118, 20, 0xf2c14e, 0.34).setStrokeStyle(3, 0xffffff, 0.42);
+    this.tweens.add({ targets: spark, scale: 1.55, alpha: 0.08, duration: 720, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
+    this.menuShowcase = [left, right, leftName, rightName, spark];
+  }
+
+  private setMenuShowcaseVisible(visible: boolean): void {
+    for (const object of this.menuShowcase) {
+      const item = object as unknown as Phaser.GameObjects.Components.Visible;
+      item.setVisible(visible);
+    }
   }
 
   private renderFighters(): void {
     const fighters = toFighters(this.room);
+    this.setMenuShowcaseVisible(fighters.length === 0);
     const seen = new Set<string>();
     for (const fighter of fighters) {
       seen.add(fighter.id);

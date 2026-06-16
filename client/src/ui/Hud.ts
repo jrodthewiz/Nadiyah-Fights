@@ -109,14 +109,25 @@ export class Hud {
   private markup(): string {
     return `
       <section id="lobbyPanel" class="lobby-panel">
+        <div class="fight-ticket" aria-hidden="true">
+          <span>Underground Card</span>
+          <strong>01</strong>
+        </div>
         <div class="brand-lockup">
           <div class="brand-mark">NF</div>
           <div>
             <h1>Nadiyah Fights</h1>
-            <p>Inked stick-fighter duels, live lobbies, clean hits.</p>
+            <p>Fast hands. Clean reads. One round at a time.</p>
           </div>
         </div>
         <div class="status-pill" id="statusText">Offline</div>
+        <div class="fighter-card-preview" aria-hidden="true">
+          <div class="portrait-disc">N</div>
+          <div>
+            <strong>Nadiyah</strong>
+            <span>Teal sash · hand-to-hand · duel ready</span>
+          </div>
+        </div>
         <label class="field-label">Fighter name<input id="playerNameInput" maxlength="18" value="Nadiyah" /></label>
         <div class="command-grid">
           <button id="hostButton" type="button">Host Lobby</button>
