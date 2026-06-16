@@ -224,6 +224,7 @@ export class GameScene extends Phaser.Scene {
       sprite.x = Phaser.Math.Linear(sprite.x, fighter.x, 0.36);
       sprite.y = Phaser.Math.Linear(sprite.y, fighter.y, 0.36);
       sprite.setFlipX(fighter.facing < 0);
+      sprite.setScale(variantId === "nadiyah" && fighter.action === "attack" ? 0.88 : 1.22);
       sprite.clearTint();
       const animKey = animationFor(variantId as CharacterVariantId, {
         action: fighter.action,

@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import type { AttackId, FighterAction } from "@shared/game/types";
 import characterManifest from "../assets/characters/manifest.json";
+import nadiyahPunchSheetUrl from "../assets/characters/generated/nadiyah-punches-normalized.png";
 
 const SHEET_URLS: Record<string, string> = {
   nadiyah: new URL("../assets/characters/nadiyah.svg", import.meta.url).href,
@@ -18,6 +19,20 @@ type AnimationRequest = {
   vx: number;
   facing: number;
 };
+
+const NADIYAH_PUNCH_SHEET = {
+  textureKey: "fighter:nadiyah:punches",
+  frameWidth: 320,
+  frameHeight: 256,
+  columns: 6,
+  rows: 4,
+  animations: {
+    lightPunch: { frames: [0, 1, 2, 3, 4, 5], fps: 18 },
+    heavyPunch: { frames: [6, 7, 8, 9, 10, 11], fps: 16 },
+    hookPunch: { frames: [12, 13, 14, 15, 16, 17], fps: 16 },
+    uppercutPunch: { frames: [18, 19, 20, 21, 22, 23], fps: 15 },
+  },
+} as const;
 
 export const CHARACTER_VARIANTS = characterManifest.variants.map((variant) => ({
   id: variant.id as CharacterVariantId,
@@ -37,6 +52,7 @@ export const preloadCharacterSheets = (scene: Phaser.Scene): void => {
       height: characterManifest.rows * characterManifest.frame.height,
     });
   }
+  scene.load.image(NADIYAH_PUNCH_SHEET.textureKey, nadiyahPunchSheetUrl);
 };
 
 export const registerCharacterSheets = (scene: Phaser.Scene): void => {
@@ -71,6 +87,44 @@ export const registerCharacterSheets = (scene: Phaser.Scene): void => {
       }
     }
   }
+
+  registerNadiyahPunchSheet(scene);
+};
+
+const registerNadiyahPunchSheet = (scene: Phaser.Scene): void => {
+  const texture = scene.textures.get(NADIYAH_PUNCH_SHEET.textureKey);
+  let index = 0;
+  for (let row = 0; row < NADIYAH_PUNCH_SHEET.rows; row += 1) {
+    for (let col = 0; col < NADIYAH_PUNCH_SHEET.columns; col += 1) {
+      const frameName = `punch_${String(index).padStart(2, "0")}`;
+      if (!texture.has(frameName)) {
+        texture.add(
+          frameName,
+          0,
+          col * NADIYAH_PUNCH_SHEET.frameWidth,
+          row * NADIYAH_PUNCH_SHEET.frameHeight,
+          NADIYAH_PUNCH_SHEET.frameWidth,
+          NADIYAH_PUNCH_SHEET.frameHeight,
+        );
+      }
+      index += 1;
+    }
+  }
+
+  for (const [name, animation] of Object.entries(NADIYAH_PUNCH_SHEET.animations)) {
+    const key = `fighter:nadiyah:generated:${name}`;
+    if (!scene.anims.exists(key)) {
+      scene.anims.create({
+        key,
+        frames: animation.frames.map((frame) => ({
+          key: NADIYAH_PUNCH_SHEET.textureKey,
+          frame: `punch_${String(frame).padStart(2, "0")}`,
+        })),
+        frameRate: animation.fps,
+        repeat: 0,
+      });
+    }
+  }
 };
 
 export const variantForFighter = (teamId: string, isBot: boolean, slotLike: string): CharacterVariantId => {
@@ -97,5 +151,7 @@ export const resolveAnimationName = ({ action, attackId, vx, facing }: Animation
 };
 
 export const animationFor = (variantId: CharacterVariantId, request: AnimationRequest): string => (
-  animationKeyFor(variantId, resolveAnimationName(request))
+  variantId === "nadiyah" && request.action === "attack"
+    ? `fighter:nadiyah:generated:${request.attackId === "heavy" ? "heavyPunch" : "lightPunch"}`
+    : animationKeyFor(variantId, resolveAnimationName(request))
 );
