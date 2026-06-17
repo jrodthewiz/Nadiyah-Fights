@@ -64,6 +64,11 @@ canvas { display: block; }
 button, input { font: inherit; }
 button { cursor: pointer; }
 button:disabled { cursor: not-allowed; opacity: 0.55; }
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 3px;
+}
 
 .hud { position: fixed; inset: 0; pointer-events: none; }
 .hud [hidden] { display: none !important; }
@@ -74,6 +79,8 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
   left: clamp(16px, 5vw, 72px);
   top: clamp(16px, 6vh, 56px);
   width: min(500px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  overflow: auto;
   display: grid;
   gap: 14px;
   padding: 22px;
@@ -139,7 +146,7 @@ p { margin: 0; color: rgba(244, 239, 226, 0.78); }
 input { width: 100%; border: 1px solid rgba(244, 239, 226, 0.22); border-radius: 6px; padding: 12px 13px; background: rgba(0, 0, 0, 0.38); color: var(--paper); outline: none; }
 input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(17, 197, 170, 0.14); }
 .command-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid rgba(242, 193, 78, 0.55); border-radius: 6px; padding: 11px 12px; background: linear-gradient(180deg, rgba(242, 193, 78, 0.22), rgba(86, 68, 24, 0.62)); color: var(--paper); font-weight: 900; text-transform: uppercase; box-shadow: inset 0 1px 0 rgba(255,255,255,0.1); }
+button { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid rgba(242, 193, 78, 0.55); border-radius: 6px; padding: 11px 12px; background: linear-gradient(180deg, rgba(242, 193, 78, 0.22), rgba(86, 68, 24, 0.62)); color: var(--paper); font-weight: 900; text-transform: uppercase; box-shadow: inset 0 1px 0 rgba(255,255,255,0.1); }
 button:hover { border-color: var(--gold); background: linear-gradient(180deg, rgba(242, 193, 78, 0.34), rgba(86, 68, 24, 0.76)); }
 .wide-command { width: 100%; background: linear-gradient(180deg, rgba(17, 197, 170, 0.28), rgba(6, 71, 64, 0.72)); border-color: rgba(17, 197, 170, 0.65); }
 .lobby-list { border-top: 1px solid rgba(244, 239, 226, 0.12); padding-top: 12px; display: grid; gap: 8px; }
@@ -170,21 +177,46 @@ button:hover { border-color: var(--gold); background: linear-gradient(180deg, rg
 .round-chip { min-width: 150px; text-align: center; display: grid; justify-items: center; gap: 2px; text-transform: uppercase; }
 .round-chip strong { font-size: 2rem; color: var(--gold); }
 .round-chip small { color: #a7fff2; }
-.controls-chip { position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); max-width: calc(100vw - 24px); display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border: 1px solid rgba(17, 197, 170, 0.34); border-radius: 999px; background: rgba(7, 9, 11, 0.72); color: rgba(244, 239, 226, 0.78); font-size: 0.88rem; white-space: nowrap; }
+.controls-chip { position: absolute; left: 50%; bottom: max(14px, env(safe-area-inset-bottom)); transform: translateX(-50%); max-width: calc(100vw - 24px); display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 8px 12px; border: 1px solid rgba(17, 197, 170, 0.34); border-radius: 999px; background: rgba(7, 9, 11, 0.68); color: rgba(244, 239, 226, 0.78); font-size: 0.78rem; white-space: nowrap; box-shadow: 0 10px 28px rgba(0, 0, 0, 0.24); }
+.key-row { display: inline-flex; align-items: center; gap: 3px; }
+kbd { min-width: 20px; height: 20px; display: inline-grid; place-items: center; padding: 0 5px; border: 1px solid rgba(242, 193, 78, 0.45); border-bottom-color: rgba(242, 193, 78, 0.78); border-radius: 4px; background: rgba(244, 239, 226, 0.08); color: var(--paper); font-family: inherit; font-size: 0.68rem; font-weight: 900; line-height: 1; }
 .match-panel { position: absolute; left: 50%; top: 22%; transform: translateX(-50%); width: min(360px, calc(100vw - 32px)); display: grid; gap: 12px; padding: 18px; text-align: center; border: 1px solid var(--line); border-radius: 8px; background: var(--panel-strong); }
 .match-panel button { justify-self: center; min-width: 150px; }
 .panel-sprite { justify-self: center; }
 .event-banner { position: absolute; left: 50%; top: 36%; transform: translate(-50%, -50%); color: var(--gold); text-transform: uppercase; font-family: Impact, "Arial Black", sans-serif; font-size: clamp(4rem, 14vw, 9rem); line-height: 1; text-shadow: 0 8px 0 #050607, 0 0 32px rgba(242, 193, 78, 0.55); }
-.event-banner.fight { top: 31%; color: #a7fff2; font-size: clamp(2.6rem, 8vw, 5.6rem); text-shadow: 0 5px 0 #050607, 0 0 24px rgba(17, 197, 170, 0.42); opacity: 0.2; }
+.event-banner.fight { top: 29%; color: #a7fff2; font-size: clamp(1.9rem, 5vw, 3.8rem); text-shadow: 0 4px 0 #050607, 0 0 18px rgba(17, 197, 170, 0.34); opacity: 0.12; pointer-events: none; }
 .ended-panel h2 { margin: 0; color: var(--gold); text-transform: uppercase; }
 
 @media (max-width: 760px) {
-  .lobby-panel { top: 12px; left: 12px; width: calc(100vw - 24px); padding: 14px; }
+  .ui-sprite { transform: scale(0.86); transform-origin: center; }
+  .lobby-panel { top: 12px; left: 12px; width: calc(100vw - 24px); padding: 14px; gap: 10px; }
+  .fight-ticket { position: static; justify-self: end; width: fit-content; margin: -4px 0 0; font-size: 0.65rem; }
+  .brand-lockup { gap: 10px; }
+  .brand-mark { width: 48px; height: 48px; }
+  h1 { font-size: clamp(1.7rem, 10vw, 2.4rem); }
   .command-grid { grid-template-columns: 1fr; }
-  .top-strip { left: 8px; right: 8px; top: 8px; grid-template-columns: 1fr 82px 1fr; gap: 6px; }
-  .fighter-card, .round-chip { padding: 8px; font-size: 0.8rem; }
+  .top-strip { left: 8px; right: 8px; top: 8px; grid-template-columns: minmax(0, 1fr) 72px minmax(0, 1fr); gap: 5px; }
+  .fighter-card, .round-chip { padding: 7px; font-size: 0.72rem; border-radius: 6px; }
+  .fighter-card { grid-template-columns: 1fr; gap: 4px; }
+  .fighter-card .character-portrait { display: none; }
+  .fighter-card small { display: none; }
+  .fighter-card-copy { min-height: 32px; }
+  .fighter-card strong { font-size: 0.72rem; }
+  .meter { height: 7px; }
   .round-chip { min-width: 82px; }
+  .round-chip .ui-sprite { display: none; }
   .round-chip strong { font-size: 1.3rem; }
-  .controls-chip { white-space: normal; width: calc(100vw - 18px); border-radius: 8px; text-align: center; bottom: 8px; font-size: 0.76rem; }
+  .controls-chip { white-space: normal; width: min(520px, calc(100vw - 18px)); border-radius: 8px; text-align: center; bottom: max(8px, env(safe-area-inset-bottom)); font-size: 0.7rem; flex-wrap: wrap; row-gap: 5px; }
+  .controls-chip .ui-sprite { display: none; }
+  kbd { min-width: 18px; height: 18px; font-size: 0.62rem; }
   .event-banner { top: 44%; }
+  .event-banner.fight { top: 32%; font-size: 2rem; opacity: 0.1; }
+  .match-panel { top: 20%; padding: 14px; }
+}
+
+@media (max-height: 620px) {
+  .lobby-panel { top: 8px; max-height: calc(100vh - 16px); }
+  .fighter-card-preview { display: none; }
+  .controls-chip { opacity: 0.56; }
+  .event-banner.fight { display: none; }
 }

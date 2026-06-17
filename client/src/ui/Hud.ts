@@ -166,7 +166,13 @@ export class Hud {
             <small><span class="ui-sprite sprite-trophy"></span>Wins <b id="redWins">0</b></small>
           </div>
         </div>
-        <div class="controls-chip"><span class="ui-sprite sprite-fist"></span><span>A/D move - W/Space jump - Shift dash - S block - J light - K heavy - L kick</span></div>
+        <div class="controls-chip" aria-label="Fight controls">
+          <span class="ui-sprite sprite-fist"></span>
+          <span class="key-row"><kbd>A</kbd><kbd>D</kbd></span><span>Move</span>
+          <span class="key-row"><kbd>W</kbd><kbd>Space</kbd></span><span>Jump</span>
+          <span class="key-row"><kbd>J</kbd><kbd>K</kbd><kbd>L</kbd></span><span>Strike</span>
+          <span class="key-row"><kbd>S</kbd><kbd>Shift</kbd></span><span>Guard/Dash</span>
+        </div>
       </section>
 
       <section id="waitingPanel" class="match-panel">
