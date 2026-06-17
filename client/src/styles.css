@@ -54,7 +54,7 @@
   box-shadow: 0 0 22px rgba(17, 197, 170, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
-.portrait-nadiyah { background-image: url("./assets/characters/nadiyah.svg"); }
+.portrait-nadiyah { background-image: url("./assets/characters/generated/nadiyah-punches-normalized.png"); background-size: 480px 256px; background-position: -12px -2px; }
 .portrait-ember { background-image: url("./assets/characters/ember.svg"); border-color: rgba(244, 63, 94, 0.72); box-shadow: 0 0 22px rgba(244, 63, 94, 0.22), inset 0 0 0 1px rgba(255, 255, 255, 0.08); }
 
 * { box-sizing: border-box; }

@@ -1,10 +1,9 @@
 import Phaser from "phaser";
 import type { AttackId, FighterAction } from "@shared/game/types";
 import characterManifest from "../assets/characters/manifest.json";
-import nadiyahPunchSheetUrl from "../assets/characters/generated/nadiyah-punches-normalized.png";
+import nadiyahGeneratedSheetUrl from "../assets/characters/generated/nadiyah-punches-normalized.png";
 
 const SHEET_URLS: Record<string, string> = {
-  nadiyah: new URL("../assets/characters/nadiyah.svg", import.meta.url).href,
   ember: new URL("../assets/characters/ember.svg", import.meta.url).href,
   violet: new URL("../assets/characters/violet.svg", import.meta.url).href,
   frost: new URL("../assets/characters/frost.svg", import.meta.url).href,
@@ -20,19 +19,30 @@ type AnimationRequest = {
   facing: number;
 };
 
-const NADIYAH_PUNCH_SHEET = {
-  textureKey: "fighter:nadiyah:punches",
+const NADIYAH_GENERATED_SHEET = {
   frameWidth: 320,
   frameHeight: 256,
   columns: 6,
   rows: 4,
-  animations: {
-    lightPunch: { frames: [0, 1, 2, 3, 4, 5], fps: 18 },
-    heavyPunch: { frames: [6, 7, 8, 9, 10, 11], fps: 16 },
-    hookPunch: { frames: [12, 13, 14, 15, 16, 17], fps: 16 },
-    uppercutPunch: { frames: [18, 19, 20, 21, 22, 23], fps: 15 },
-  },
 } as const;
+
+const NADIYAH_GENERATED_ANIMATIONS: Record<AnimationKey, { frames: number[]; fps: number; loop: boolean }> = {
+  idle: { frames: [0, 1, 2, 1], fps: 8, loop: true },
+  walkForward: { frames: [0, 1, 2, 3, 4, 5], fps: 12, loop: true },
+  walkBack: { frames: [2, 1, 0, 1], fps: 10, loop: true },
+  crouch: { frames: [18, 19, 20], fps: 9, loop: false },
+  jump: { frames: [18, 19, 20, 21], fps: 10, loop: false },
+  dashForward: { frames: [3, 4, 5], fps: 15, loop: false },
+  lightPunch: { frames: [0, 1, 2, 3, 4, 5], fps: 18, loop: false },
+  heavyPunch: { frames: [6, 7, 8, 9, 10, 11], fps: 16, loop: false },
+  kick: { frames: [12, 13, 14, 15, 16, 17], fps: 15, loop: false },
+  blockHigh: { frames: [1, 2, 1], fps: 10, loop: false },
+  hitStun: { frames: [18, 19, 20], fps: 12, loop: false },
+  knockdown: { frames: [18, 19, 20, 21, 22, 23], fps: 12, loop: false },
+  getUp: { frames: [23, 22, 21, 20, 19, 18], fps: 12, loop: false },
+  victory: { frames: [0, 1, 2, 1], fps: 8, loop: true },
+  ko: { frames: [18, 19, 20, 21, 22, 23], fps: 10, loop: false },
+};
 
 export const CHARACTER_VARIANTS = characterManifest.variants.map((variant) => ({
   id: variant.id as CharacterVariantId,
@@ -47,12 +57,15 @@ export const animationKeyFor = (variantId: CharacterVariantId, animation: Animat
 
 export const preloadCharacterSheets = (scene: Phaser.Scene): void => {
   for (const variant of characterManifest.variants) {
+    if (variant.id === "nadiyah") {
+      scene.load.image(textureKeyFor("nadiyah"), nadiyahGeneratedSheetUrl);
+      continue;
+    }
     scene.load.svg(textureKeyFor(variant.id as CharacterVariantId), SHEET_URLS[variant.id], {
       width: characterManifest.columns * characterManifest.frame.width,
       height: characterManifest.rows * characterManifest.frame.height,
     });
   }
-  scene.load.image(NADIYAH_PUNCH_SHEET.textureKey, nadiyahPunchSheetUrl);
 };
 
 export const registerCharacterSheets = (scene: Phaser.Scene): void => {
@@ -61,6 +74,10 @@ export const registerCharacterSheets = (scene: Phaser.Scene): void => {
 
   for (const variant of characterManifest.variants) {
     const variantId = variant.id as CharacterVariantId;
+    if (variantId === "nadiyah") {
+      registerGeneratedNadiyahSheet(scene);
+      continue;
+    }
     const textureKey = textureKeyFor(variantId);
     const texture = scene.textures.get(textureKey);
     let index = 0;
@@ -88,40 +105,44 @@ export const registerCharacterSheets = (scene: Phaser.Scene): void => {
     }
   }
 
-  registerNadiyahPunchSheet(scene);
 };
 
-const registerNadiyahPunchSheet = (scene: Phaser.Scene): void => {
-  const texture = scene.textures.get(NADIYAH_PUNCH_SHEET.textureKey);
+const registerGeneratedNadiyahSheet = (scene: Phaser.Scene): void => {
+  const textureKey = textureKeyFor("nadiyah");
+  const texture = scene.textures.get(textureKey);
+  const addFrame = (frameName: string, frameIndex: number): void => {
+    if (texture.has(frameName)) return;
+    const col = frameIndex % NADIYAH_GENERATED_SHEET.columns;
+    const row = Math.floor(frameIndex / NADIYAH_GENERATED_SHEET.columns);
+    texture.add(
+      frameName,
+      0,
+      col * NADIYAH_GENERATED_SHEET.frameWidth,
+      row * NADIYAH_GENERATED_SHEET.frameHeight,
+      NADIYAH_GENERATED_SHEET.frameWidth,
+      NADIYAH_GENERATED_SHEET.frameHeight,
+    );
+  };
   let index = 0;
-  for (let row = 0; row < NADIYAH_PUNCH_SHEET.rows; row += 1) {
-    for (let col = 0; col < NADIYAH_PUNCH_SHEET.columns; col += 1) {
-      const frameName = `punch_${String(index).padStart(2, "0")}`;
-      if (!texture.has(frameName)) {
-        texture.add(
-          frameName,
-          0,
-          col * NADIYAH_PUNCH_SHEET.frameWidth,
-          row * NADIYAH_PUNCH_SHEET.frameHeight,
-          NADIYAH_PUNCH_SHEET.frameWidth,
-          NADIYAH_PUNCH_SHEET.frameHeight,
-        );
-      }
+  for (let row = 0; row < NADIYAH_GENERATED_SHEET.rows; row += 1) {
+    for (let col = 0; col < NADIYAH_GENERATED_SHEET.columns; col += 1) {
+      addFrame(`punch_${String(index).padStart(2, "0")}`, index);
       index += 1;
     }
   }
+  addFrame(defaultFrameName, 0);
 
-  for (const [name, animation] of Object.entries(NADIYAH_PUNCH_SHEET.animations)) {
-    const key = `fighter:nadiyah:generated:${name}`;
+  for (const [animationName, animation] of Object.entries(NADIYAH_GENERATED_ANIMATIONS) as Array<[AnimationKey, typeof NADIYAH_GENERATED_ANIMATIONS[AnimationKey]]>) {
+    const key = animationKeyFor("nadiyah", animationName);
     if (!scene.anims.exists(key)) {
       scene.anims.create({
         key,
         frames: animation.frames.map((frame) => ({
-          key: NADIYAH_PUNCH_SHEET.textureKey,
+          key: textureKey,
           frame: `punch_${String(frame).padStart(2, "0")}`,
         })),
         frameRate: animation.fps,
-        repeat: 0,
+        repeat: animation.loop ? -1 : 0,
       });
     }
   }
@@ -151,7 +172,5 @@ export const resolveAnimationName = ({ action, attackId, vx, facing }: Animation
 };
 
 export const animationFor = (variantId: CharacterVariantId, request: AnimationRequest): string => (
-  variantId === "nadiyah" && request.action === "attack"
-    ? `fighter:nadiyah:generated:${request.attackId === "heavy" ? "heavyPunch" : "lightPunch"}`
-    : animationKeyFor(variantId, resolveAnimationName(request))
+  animationKeyFor(variantId, resolveAnimationName(request))
 );

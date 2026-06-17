@@ -153,7 +153,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private createMenuShowcase(): void {
-    const left = this.add.sprite(734, ARENA.floorY, textureKeyFor("nadiyah"), defaultFrameName).setOrigin(0.5, 0.94).setScale(1.72);
+    const left = this.add.sprite(734, ARENA.floorY, textureKeyFor("nadiyah"), defaultFrameName).setOrigin(0.5, 0.94).setScale(1.08);
     const middle = this.add.sprite(884, ARENA.floorY, textureKeyFor("violet"), defaultFrameName).setOrigin(0.5, 0.94).setScale(1.58).setFlipX(true);
     const right = this.add.sprite(1028, ARENA.floorY, textureKeyFor("ember"), defaultFrameName).setOrigin(0.5, 0.94).setScale(1.72).setFlipX(true);
     left.play("fighter:nadiyah:idle");
@@ -224,7 +224,7 @@ export class GameScene extends Phaser.Scene {
       sprite.x = Phaser.Math.Linear(sprite.x, fighter.x, 0.36);
       sprite.y = Phaser.Math.Linear(sprite.y, fighter.y, 0.36);
       sprite.setFlipX(fighter.facing < 0);
-      sprite.setScale(variantId === "nadiyah" && fighter.action === "attack" ? 0.88 : 1.22);
+      sprite.setScale(variantId === "nadiyah" ? 0.88 : 1.22);
       sprite.clearTint();
       const animKey = animationFor(variantId as CharacterVariantId, {
         action: fighter.action,

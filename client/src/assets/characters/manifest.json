@@ -28,7 +28,7 @@
     {
       "id": "nadiyah",
       "label": "Nadiyah",
-      "sheet": "nadiyah.svg",
+      "sheet": "generated/nadiyah-punches-normalized.png",
       "frame": {
         "width": 160,
         "height": 192
