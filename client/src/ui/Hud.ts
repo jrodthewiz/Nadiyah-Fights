@@ -96,6 +96,12 @@ export class Hud {
     this.text("waitingText", snapshot.fighters.length < 2 ? "Waiting for a rival." : "Both fighters must mark ready.");
     this.text("winnerText", snapshot.winnerTeamId ? `${snapshot.winnerTeamId.toUpperCase()} wins` : "Round complete");
     this.text("readyButtonLabel", local?.ready ? "Ready" : "Mark Ready");
+    this.disable("hostButton", snapshot.connecting);
+    this.disable("practiceButton", snapshot.connecting);
+    this.disable("refreshButton", snapshot.connecting);
+    this.disable("joinButton", snapshot.connecting);
+    this.disable("readyButton", local?.ready === true || snapshot.roundState !== "waiting");
+    this.disable("rematchButton", snapshot.roundState !== "roundEnd");
 
     this.toggle("lobbyPanel", !active);
     this.toggle("activeHud", active);
@@ -244,6 +250,11 @@ export class Hud {
   private toggle(id: string, visible: boolean): void {
     const element = this.byId<HTMLElement>(id);
     if (element) element.hidden = !visible;
+  }
+
+  private disable(id: string, disabled: boolean): void {
+    const element = this.byId<HTMLButtonElement>(id);
+    if (element) element.disabled = disabled;
   }
 
   private byId<T extends HTMLElement = HTMLElement>(id: string): T | null {
