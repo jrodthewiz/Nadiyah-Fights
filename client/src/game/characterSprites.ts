@@ -1,13 +1,8 @@
-import Phaser from "phaser";
+import type Phaser from "phaser";
+import { ATTACKS, attackDuration } from "@shared/game/attacks";
 import type { AttackId, FighterAction } from "@shared/game/types";
 import characterManifest from "../assets/characters/manifest.json";
-import nadiyahGeneratedSheetUrl from "../assets/characters/generated/nadiyah-punches-normalized.png";
-
-const SHEET_URLS: Record<string, string> = {
-  ember: new URL("../assets/characters/ember.svg", import.meta.url).href,
-  violet: new URL("../assets/characters/violet.svg", import.meta.url).href,
-  frost: new URL("../assets/characters/frost.svg", import.meta.url).href,
-};
+import nadiyahSheetUrl from "../assets/characters/nadiyah.png";
 
 type AnimationKey = keyof typeof characterManifest.variants[number]["animations"];
 export type CharacterVariantId = typeof characterManifest.variants[number]["id"];
@@ -17,32 +12,14 @@ type AnimationRequest = {
   attackId: AttackId | "";
   vx: number;
   facing: number;
+  actionFrame?: number;
 };
 
-const NADIYAH_GENERATED_SHEET = {
-  frameWidth: 320,
-  frameHeight: 256,
-  columns: 6,
-  rows: 4,
-} as const;
-
-const NADIYAH_GENERATED_ANIMATIONS: Record<AnimationKey, { frames: number[]; fps: number; loop: boolean }> = {
-  idle: { frames: [0, 1, 2, 1], fps: 8, loop: true },
-  walkForward: { frames: [0, 1, 2, 3, 4, 5], fps: 12, loop: true },
-  walkBack: { frames: [2, 1, 0, 1], fps: 10, loop: true },
-  crouch: { frames: [18, 19, 20], fps: 9, loop: false },
-  jump: { frames: [18, 19, 20, 21], fps: 10, loop: false },
-  dashForward: { frames: [3, 4, 5], fps: 15, loop: false },
-  lightPunch: { frames: [0, 1, 2, 3, 4, 5], fps: 18, loop: false },
-  heavyPunch: { frames: [6, 7, 8, 9, 10, 11], fps: 16, loop: false },
-  kick: { frames: [12, 13, 14, 15, 16, 17], fps: 15, loop: false },
-  blockHigh: { frames: [1, 2, 1], fps: 10, loop: false },
-  hitStun: { frames: [18, 19, 20], fps: 12, loop: false },
-  knockdown: { frames: [18, 19, 20, 21, 22, 23], fps: 12, loop: false },
-  getUp: { frames: [23, 22, 21, 20, 19, 18], fps: 12, loop: false },
-  victory: { frames: [0, 1, 2, 1], fps: 8, loop: true },
-  ko: { frames: [18, 19, 20, 21, 22, 23], fps: 10, loop: false },
+const SHEET_URLS: Record<CharacterVariantId, string> = {
+  nadiyah: nadiyahSheetUrl,
 };
+
+const manifestVariant = characterManifest.variants[0];
 
 export const CHARACTER_VARIANTS = characterManifest.variants.map((variant) => ({
   id: variant.id as CharacterVariantId,
@@ -52,94 +29,60 @@ export const CHARACTER_VARIANTS = characterManifest.variants.map((variant) => ({
 export const defaultVariantId: CharacterVariantId = "nadiyah";
 export const defaultFrameName = "idle_00";
 
+export const VARIANT_TINTS: Record<CharacterVariantId, number> = {
+  nadiyah: 0xffffff,
+};
+
 export const textureKeyFor = (variantId: CharacterVariantId): string => `fighter:${variantId}`;
 export const animationKeyFor = (variantId: CharacterVariantId, animation: AnimationKey): string => `fighter:${variantId}:${animation}`;
 
 export const preloadCharacterSheets = (scene: Phaser.Scene): void => {
   for (const variant of characterManifest.variants) {
-    if (variant.id === "nadiyah") {
-      scene.load.image(textureKeyFor("nadiyah"), nadiyahGeneratedSheetUrl);
-      continue;
-    }
-    scene.load.svg(textureKeyFor(variant.id as CharacterVariantId), SHEET_URLS[variant.id], {
-      width: characterManifest.columns * characterManifest.frame.width,
-      height: characterManifest.rows * characterManifest.frame.height,
-    });
+    const variantId = variant.id as CharacterVariantId;
+    scene.load.image(textureKeyFor(variantId), SHEET_URLS[variantId]);
   }
 };
 
 export const registerCharacterSheets = (scene: Phaser.Scene): void => {
-  const frameWidth = characterManifest.frame.width;
-  const frameHeight = characterManifest.frame.height;
-
   for (const variant of characterManifest.variants) {
-    const variantId = variant.id as CharacterVariantId;
-    if (variantId === "nadiyah") {
-      registerGeneratedNadiyahSheet(scene);
-      continue;
-    }
-    const textureKey = textureKeyFor(variantId);
-    const texture = scene.textures.get(textureKey);
-    let index = 0;
-
-    for (const animationName of characterManifest.animationOrder as AnimationKey[]) {
-      const animation = variant.animations[animationName];
-      for (const frameName of animation.frames) {
-        if (!texture.has(frameName)) {
-          const col = index % characterManifest.columns;
-          const row = Math.floor(index / characterManifest.columns);
-          texture.add(frameName, 0, col * frameWidth, row * frameHeight, frameWidth, frameHeight);
-        }
-        index += 1;
-      }
-
-      const animKey = animationKeyFor(variantId, animationName);
-      if (!scene.anims.exists(animKey)) {
-        scene.anims.create({
-          key: animKey,
-          frames: animation.frames.map((frameName) => ({ key: textureKey, frame: frameName })),
-          frameRate: animation.fps,
-          repeat: animation.loop ? -1 : 0,
-        });
-      }
-    }
+    registerManifestCharacterSheet(scene, variant);
   }
-
 };
 
-const registerGeneratedNadiyahSheet = (scene: Phaser.Scene): void => {
-  const textureKey = textureKeyFor("nadiyah");
+const registerManifestCharacterSheet = (scene: Phaser.Scene, variant: typeof characterManifest.variants[number]): void => {
+  const variantId = variant.id as CharacterVariantId;
+  const textureKey = textureKeyFor(variantId);
   const texture = scene.textures.get(textureKey);
   const addFrame = (frameName: string, frameIndex: number): void => {
     if (texture.has(frameName)) return;
-    const col = frameIndex % NADIYAH_GENERATED_SHEET.columns;
-    const row = Math.floor(frameIndex / NADIYAH_GENERATED_SHEET.columns);
+    const col = frameIndex % variant.columns;
+    const row = Math.floor(frameIndex / variant.columns);
     texture.add(
       frameName,
       0,
-      col * NADIYAH_GENERATED_SHEET.frameWidth,
-      row * NADIYAH_GENERATED_SHEET.frameHeight,
-      NADIYAH_GENERATED_SHEET.frameWidth,
-      NADIYAH_GENERATED_SHEET.frameHeight,
+      col * variant.frame.width,
+      row * variant.frame.height,
+      variant.frame.width,
+      variant.frame.height,
     );
   };
+
   let index = 0;
-  for (let row = 0; row < NADIYAH_GENERATED_SHEET.rows; row += 1) {
-    for (let col = 0; col < NADIYAH_GENERATED_SHEET.columns; col += 1) {
-      addFrame(`punch_${String(index).padStart(2, "0")}`, index);
+  for (const animationName of characterManifest.animationOrder as AnimationKey[]) {
+    for (const frameName of variant.animations[animationName].frames) {
+      addFrame(frameName, index);
       index += 1;
     }
   }
-  addFrame(defaultFrameName, 0);
 
-  for (const [animationName, animation] of Object.entries(NADIYAH_GENERATED_ANIMATIONS) as Array<[AnimationKey, typeof NADIYAH_GENERATED_ANIMATIONS[AnimationKey]]>) {
-    const key = animationKeyFor("nadiyah", animationName);
+  for (const [animationName, animation] of Object.entries(variant.animations) as Array<[AnimationKey, typeof variant.animations[AnimationKey]]>) {
+    const key = animationKeyFor(variantId, animationName);
     if (!scene.anims.exists(key)) {
       scene.anims.create({
         key,
         frames: animation.frames.map((frame) => ({
           key: textureKey,
-          frame: `punch_${String(frame).padStart(2, "0")}`,
+          frame,
         })),
         frameRate: animation.fps,
         repeat: animation.loop ? -1 : 0,
@@ -148,12 +91,7 @@ const registerGeneratedNadiyahSheet = (scene: Phaser.Scene): void => {
   }
 };
 
-export const variantForFighter = (teamId: string, isBot: boolean, slotLike: string): CharacterVariantId => {
-  if (isBot) return "frost";
-  if (teamId === "red") return "ember";
-  if (slotLike.includes("violet")) return "violet";
-  return "nadiyah";
-};
+export const variantForFighter = (): CharacterVariantId => "nadiyah";
 
 export const resolveAnimationName = ({ action, attackId, vx, facing }: AnimationRequest): AnimationKey => {
   if (action === "attack") {
@@ -174,3 +112,61 @@ export const resolveAnimationName = ({ action, attackId, vx, facing }: Animation
 export const animationFor = (variantId: CharacterVariantId, request: AnimationRequest): string => (
   animationKeyFor(variantId, resolveAnimationName(request))
 );
+
+const animationDefinition = (animationName: AnimationKey): typeof manifestVariant.animations[AnimationKey] => (
+  manifestVariant.animations[animationName]
+);
+
+const frameAtProgress = (frames: string[], progress: number): string => {
+  const clampedProgress = Math.min(0.999, Math.max(0, progress));
+  return frames[Math.min(frames.length - 1, Math.floor(clampedProgress * frames.length))] ?? defaultFrameName;
+};
+
+const frameFromPhases = (actionFrame: number, attackId: AttackId): string => {
+  const attack = ATTACKS[attackId];
+  const animationName = attackId === "heavy" ? "heavyPunch" : attackId === "kick" ? "kick" : "lightPunch";
+  const frames = animationDefinition(animationName).frames;
+  const phaseFrame = Math.max(0, actionFrame);
+  const windupEnd = Math.max(1, Math.floor(frames.length * 0.42));
+  const activeEnd = Math.max(windupEnd + 1, Math.floor(frames.length * 0.78));
+
+  if (phaseFrame < attack.startup) {
+    return frameAtProgress(frames.slice(0, windupEnd), phaseFrame / Math.max(1, attack.startup));
+  }
+  if (phaseFrame < attack.startup + attack.active) {
+    const activeFrame = phaseFrame - attack.startup;
+    return frameAtProgress(frames.slice(windupEnd, activeEnd), activeFrame / Math.max(1, attack.active));
+  }
+  const recoveryFrame = phaseFrame - attack.startup - attack.active;
+  return frameAtProgress(frames.slice(activeEnd), recoveryFrame / Math.max(1, attack.recovery));
+};
+
+const actionDurationFor = (animationName: AnimationKey, attackId: AttackId | ""): number => {
+  if (animationName === "lightPunch") return attackDuration(ATTACKS.light);
+  if (animationName === "heavyPunch") return attackDuration(ATTACKS.heavy);
+  if (animationName === "kick") return attackDuration(ATTACKS.kick);
+  if (animationName === "dashForward") return 7;
+  if (animationName === "jump") return 24;
+  if (animationName === "hitStun") return 14;
+  if (animationName === "blockHigh") return 8;
+  if (animationName === "knockdown" || animationName === "ko") return 28;
+  if (animationName === "getUp") return 18;
+  if (attackId && ATTACKS[attackId]) return attackDuration(ATTACKS[attackId]);
+  return 36;
+};
+
+export const frameFor = (request: AnimationRequest): string => {
+  const animationName = resolveAnimationName(request);
+  if (request.action === "attack" && request.attackId) {
+    return frameFromPhases(request.actionFrame ?? 0, request.attackId);
+  }
+  const animation = animationDefinition(animationName);
+  const frame = Math.max(0, request.actionFrame ?? 0);
+  if (animation.loop) {
+    const ticksPerFrame = Math.max(1, Math.round(60 / animation.fps));
+    return animation.frames[Math.floor(frame / ticksPerFrame) % animation.frames.length] ?? defaultFrameName;
+  }
+  const duration = Math.max(1, actionDurationFor(animationName, request.attackId));
+  const index = Math.min(animation.frames.length - 1, Math.floor((frame / duration) * animation.frames.length));
+  return animation.frames[index] ?? defaultFrameName;
+};

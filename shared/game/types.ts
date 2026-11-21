@@ -9,6 +9,7 @@ export type InputPayload = {
   seq: number;
   clientTick: number;
   buttons: number;
+  pressed?: number;
 };
 
 export type SetReadyPayload = {
@@ -91,6 +92,8 @@ export type FighterSimState = {
   actionFrame: number;
   attackId: AttackId | "";
   attackSeq: number;
+  attackBufferId: AttackId | "";
+  attackBufferTicks: number;
   cooldownTicks: number;
   dashTicks: number;
   dashCooldownTicks: number;

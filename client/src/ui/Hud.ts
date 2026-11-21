@@ -17,6 +17,7 @@ type FighterView = {
 export type HudSnapshot = {
   connected: boolean;
   connecting: boolean;
+  animationLab: boolean;
   status: string;
   code: string;
   roundState: RoundState | "offline";
@@ -30,6 +31,8 @@ export type HudSnapshot = {
 type HudCallbacks = {
   hostLobby: (name: string) => void;
   practiceBot: (name: string) => void;
+  animationTest: () => void;
+  closeAnimationTest: () => void;
   joinLobby: (code: string, name: string) => void;
   refreshLobbies: () => void;
   setReady: () => void;
@@ -39,6 +42,7 @@ type HudCallbacks = {
 const emptySnapshot: HudSnapshot = {
   connected: false,
   connecting: false,
+  animationLab: false,
   status: "Offline",
   code: "------",
   roundState: "offline",
@@ -75,6 +79,7 @@ export class Hud {
     this.root.dataset.connected = String(snapshot.connected);
     this.root.dataset.localX = String(Math.round(local?.x ?? 0));
     this.root.dataset.localHp = String(Math.round(local?.hp ?? 0));
+    this.root.dataset.localAction = local?.action ?? "";
     this.root.dataset.blueHp = String(Math.round(blue?.hp ?? 0));
     this.root.dataset.redHp = String(Math.round(red?.hp ?? 0));
     this.root.dataset.fighterCount = String(snapshot.fighters.length);
@@ -98,17 +103,20 @@ export class Hud {
     this.text("readyButtonLabel", local?.ready ? "Ready" : "Mark Ready");
     this.disable("hostButton", snapshot.connecting);
     this.disable("practiceButton", snapshot.connecting);
+    this.disable("animationTestButton", snapshot.connecting);
     this.disable("refreshButton", snapshot.connecting);
     this.disable("joinButton", snapshot.connecting);
     this.disable("readyButton", local?.ready === true || snapshot.roundState !== "waiting");
     this.disable("rematchButton", snapshot.roundState !== "roundEnd");
 
-    this.toggle("lobbyPanel", !active);
+    this.toggle("lobbyPanel", !active && !snapshot.animationLab);
     this.toggle("activeHud", active);
+    this.toggle("animationLabPanel", snapshot.animationLab);
     this.toggle("waitingPanel", snapshot.connected && snapshot.roundState === "waiting");
     this.toggle("endedPanel", snapshot.connected && snapshot.roundState === "roundEnd");
     this.toggle("countdownBanner", snapshot.connected && snapshot.roundState === "countdown");
     this.toggle("fightBanner", snapshot.connected && snapshot.roundState === "active");
+    this.toggle("lobbyList", !active && snapshot.lobbies.length > 0);
     this.renderLobbies(snapshot.lobbies);
   }
 
@@ -124,29 +132,43 @@ export class Hud {
           <div class="brand-mark"><span class="ui-sprite sprite-mask"></span></div>
           <div>
             <h1>Nadiyah Fights</h1>
-            <p>Fast hands. Clean reads. One round at a time.</p>
+            <p>Underground duel circuit</p>
           </div>
         </div>
-        <div class="status-pill"><span class="ui-sprite sprite-ready"></span><span id="statusText">Offline</span></div>
-        <div class="fighter-card-preview" aria-hidden="true">
-          <div class="character-portrait portrait-nadiyah"></div>
-          <div>
-            <strong>Nadiyah</strong>
-            <span>Teal sash - hand-to-hand - duel ready</span>
+        <div class="menu-strip">
+          <div class="status-pill"><span class="ui-sprite sprite-ready"></span><span id="statusText">Offline</span></div>
+          <div class="fighter-card-preview" aria-hidden="true">
+            <div class="character-portrait portrait-nadiyah"></div>
+            <div>
+              <strong>Nadiyah</strong>
+              <span>Teal sash - duel ready</span>
+            </div>
           </div>
         </div>
-        <label class="field-label">Fighter name<input id="playerNameInput" maxlength="18" value="Nadiyah" /></label>
+        <label class="field-label callsign-field"><span>Callsign</span><input id="playerNameInput" maxlength="18" value="Nadiyah" /></label>
         <div class="command-grid">
           <button id="hostButton" type="button"><span class="ui-sprite sprite-ticket"></span><span>Host Lobby</span></button>
           <button id="practiceButton" type="button"><span class="ui-sprite sprite-fist"></span><span>Practice Bot</span></button>
+          <button id="animationTestButton" type="button"><span class="ui-sprite sprite-mask"></span><span>Animation Lab</span></button>
           <button id="refreshButton" type="button"><span class="ui-sprite sprite-scroll"></span><span>Browse Lobbies</span></button>
         </div>
-        <label class="field-label">Lobby code<input id="joinCodeInput" maxlength="8" placeholder="ABC123" /></label>
-        <button id="joinButton" class="wide-command" type="button"><span class="ui-sprite sprite-code"></span><span>Join By Code</span></button>
-        <div class="lobby-list">
+        <div class="join-deck">
+          <label class="field-label"><span>Lobby code</span><input id="joinCodeInput" maxlength="8" placeholder="ABC123" /></label>
+          <button id="joinButton" class="wide-command" type="button"><span class="ui-sprite sprite-code"></span><span>Join</span></button>
+        </div>
+        <div id="lobbyList" class="lobby-list">
           <div class="lobby-list-title"><span class="ui-sprite sprite-scroll"></span><span>Open Lobbies</span></div>
           <div id="lobbyListRows" class="lobby-list-rows"></div>
         </div>
+      </section>
+
+      <section id="animationLabPanel" class="animation-lab-panel">
+        <div>
+          <strong>Animation Lab</strong>
+          <span>1 Idle  2 Walk  3 Back  4 Jump  5 Dash  6 Jab  7 Heavy  8 Kick  9 Block  0 Hit</span>
+          <span>Q/E Variant  R Knockdown  T KO</span>
+        </div>
+        <button id="closeAnimationTestButton" type="button"><span class="ui-sprite sprite-rematch"></span><span>Exit</span></button>
       </section>
 
       <section id="activeHud" class="active-hud">
@@ -165,7 +187,7 @@ export class Hud {
             <small id="roomCode">------</small>
           </div>
           <div class="fighter-card red-card">
-            <span class="character-portrait portrait-ember"></span>
+            <span class="character-portrait portrait-nadiyah"></span>
             <span class="fighter-card-copy"><strong id="redName">Waiting</strong><span id="redHpText">0 HP</span></span>
             <div class="meter hp"><span id="redHpBar"></span></div>
             <div class="meter power"><span id="redMeterBar"></span></div>
@@ -177,7 +199,8 @@ export class Hud {
           <span class="key-row"><kbd>A</kbd><kbd>D</kbd></span><span>Move</span>
           <span class="key-row"><kbd>W</kbd><kbd>Space</kbd></span><span>Jump</span>
           <span class="key-row"><kbd>J</kbd><kbd>K</kbd><kbd>L</kbd></span><span>Strike</span>
-          <span class="key-row"><kbd>S</kbd><kbd>Shift</kbd></span><span>Guard/Dash</span>
+          <span class="key-row"><kbd>S</kbd></span><span>Guard</span>
+          <span class="key-row"><kbd>Shift</kbd></span><span>Dash</span>
         </div>
       </section>
 
@@ -199,6 +222,8 @@ export class Hud {
   private bind(): void {
     this.byId("hostButton")?.addEventListener("click", () => this.callbacks?.hostLobby(this.playerName()));
     this.byId("practiceButton")?.addEventListener("click", () => this.callbacks?.practiceBot(this.playerName()));
+    this.byId("animationTestButton")?.addEventListener("click", () => this.callbacks?.animationTest());
+    this.byId("closeAnimationTestButton")?.addEventListener("click", () => this.callbacks?.closeAnimationTest());
     this.byId("refreshButton")?.addEventListener("click", () => this.callbacks?.refreshLobbies());
     this.byId("joinButton")?.addEventListener("click", () => this.callbacks?.joinLobby(this.joinCode(), this.playerName()));
     this.byId("readyButton")?.addEventListener("click", () => this.callbacks?.setReady());

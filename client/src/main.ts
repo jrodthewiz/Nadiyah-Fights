@@ -20,6 +20,8 @@ type FighterLike = {
   isBot: boolean;
   x: number;
   action: string;
+  actionFrame: number;
+  attackId: string;
   wins: number;
 };
 
@@ -40,6 +42,7 @@ class NadiyahApp {
   private lobbies: LobbyInfo[] = [];
   private status = "Offline";
   private connecting = false;
+  private animationLab = false;
 
   constructor() {
     const hudRoot = document.querySelector<HTMLElement>("#hud-root");
@@ -59,16 +62,31 @@ class NadiyahApp {
     this.hud.setCallbacks({
       hostLobby: (name) => void this.hostLobby(name),
       practiceBot: (name) => void this.practiceBot(name),
+      animationTest: () => this.openAnimationLab(),
+      closeAnimationTest: () => this.closeAnimationLab(),
       joinLobby: (code, name) => void this.joinLobby(code, name),
       refreshLobbies: () => void this.refreshLobbies(),
       setReady: () => this.setReady(),
       rematch: () => this.rematch(),
     });
-    void this.refreshLobbies();
+    void this.refreshLobbies().then(() => {
+      const params = new URLSearchParams(window.location.search);
+      const targetCode = (params.get('room') || params.get('joinId') || params.get('code') || '').trim().toUpperCase();
+      const shouldQuickJoin = params.get('quickJoin') === '1' || params.get('autoJoin') === '1' || Boolean(targetCode);
+      if (shouldQuickJoin) {
+        const guestName = (params.get('name') || params.get('playerName') || ('Fighter-' + Math.floor(1000 + Math.random() * 9000))).slice(0, 15);
+        if (targetCode) {
+          void this.joinLobby(targetCode, guestName);
+        } else if (this.lobbies.length > 0) {
+          void this.joinLobby(this.lobbies[0].code, guestName);
+        }
+      }
+    });
     this.render();
   }
 
   private async hostLobby(playerName: string): Promise<void> {
+    this.closeAnimationLab();
     await this.connectingTask(async () => {
       const room = await this.client.create(ROOM_NAME, { playerName, hostName: playerName, mode: "duel", maxPlayers: 2 });
       this.attachRoom(room);
@@ -76,6 +94,7 @@ class NadiyahApp {
   }
 
   private async practiceBot(playerName: string): Promise<void> {
+    this.closeAnimationLab();
     await this.connectingTask(async () => {
       const room = await this.client.create(ROOM_NAME, { playerName, hostName: playerName, mode: "duel", maxPlayers: 2, bot: true, private: true });
       this.attachRoom(room);
@@ -83,6 +102,7 @@ class NadiyahApp {
   }
 
   private async joinLobby(code: string, playerName: string): Promise<void> {
+    this.closeAnimationLab();
     const normalized = code.trim().toUpperCase();
     if (!normalized) {
       this.status = "Enter a lobby code.";
@@ -119,6 +139,24 @@ class NadiyahApp {
 
   private rematch(): void {
     this.room?.send(CLIENT_MESSAGES.REMATCH);
+  }
+
+  private openAnimationLab(): void {
+    void this.room?.leave();
+    this.room = null;
+    this.animationLab = true;
+    this.status = "Animation lab";
+    this.scene.setRoom(null);
+    this.scene.setAnimationTestMode(true);
+    this.render();
+  }
+
+  private closeAnimationLab(): void {
+    if (!this.animationLab) return;
+    this.animationLab = false;
+    this.status = "Offline";
+    this.scene.setAnimationTestMode(false);
+    this.render();
   }
 
   private attachRoom(room: Room): void {
@@ -164,6 +202,7 @@ class NadiyahApp {
     this.hud.render({
       connected: this.room !== null,
       connecting: this.connecting,
+      animationLab: this.animationLab,
       status: this.status,
       code: state?.code ?? "------",
       roundState: state?.roundState ?? "offline",

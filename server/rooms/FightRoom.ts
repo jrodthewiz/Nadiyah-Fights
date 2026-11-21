@@ -1,7 +1,7 @@
 import { Client, Room } from "colyseus";
 import { BOT_SESSION_ID, ROUND, SIMULATION } from "../../shared/game/constants";
 import { CLIENT_MESSAGES, SERVER_MESSAGES } from "../../shared/game/messages";
-import { createFighter, createMatch, rematch, resetFighterForRound, startCountdown, stepMatch, type StepInputs } from "../../shared/game/simulation";
+import { createFighter, createMatch, ONE_SHOT_INPUT_MASK, rematch, resetFighterForRound, startCountdown, stepMatch, type StepInputs } from "../../shared/game/simulation";
 import { INPUT_BITS } from "../../shared/game/input";
 import type { CombatEvent, CreateFightRoomOptions, InputPayload, JoinFightRoomOptions, MatchMode, SetReadyPayload } from "../../shared/game/types";
 import { createLobbyCode, normalizeLobbyCode, removeLobby, upsertLobby } from "../lobbies";
@@ -139,6 +139,7 @@ export class FightRoom extends Room {
       seq: Math.trunc(seq),
       clientTick: Math.trunc(Number(payload?.clientTick ?? 0)),
       buttons: Math.trunc(Number(payload?.buttons ?? 0)),
+      pressed: Math.trunc(Number(payload?.pressed ?? 0)),
     };
     this.lastSeqBySession.set(sessionId, input.seq);
     this.lastInputs.set(sessionId, input);
@@ -170,6 +171,7 @@ export class FightRoom extends Room {
     for (const [sessionId, input] of this.lastInputs) inputs[sessionId] = input;
     this.updatePracticeBotInput(inputs);
     const events = stepMatch(this.sim, inputs);
+    this.consumeOneShotInputs();
     this.syncStateFromSim();
     for (const event of events) this.broadcast(SERVER_MESSAGES.COMBAT_EVENT, event);
     if (this.sim.roundState === "roundEnd" && this.sim.roundEndTicks === ROUND.roundEndTicks - 1) {
@@ -184,15 +186,25 @@ export class FightRoom extends Room {
     const opponent = Object.values(this.sim.fighters).find((fighter) => !fighter.isBot && fighter.hp > 0);
     if (!opponent) return;
     let buttons = 0;
+    let pressed = 0;
     const distance = opponent.x - bot.x;
     if (Math.abs(distance) > 92) buttons |= distance > 0 ? INPUT_BITS.right : INPUT_BITS.left;
     else if (this.sim.serverTick >= this.botNextAttackTick) {
-      buttons |= this.sim.serverTick % 2 === 0 ? INPUT_BITS.light : INPUT_BITS.kick;
+      pressed = this.sim.serverTick % 2 === 0 ? INPUT_BITS.light : INPUT_BITS.kick;
+      buttons |= pressed;
       this.botNextAttackTick = this.sim.serverTick + 42;
     } else if (Math.abs(distance) < 68) {
       buttons |= INPUT_BITS.block;
     }
-    inputs[BOT_SESSION_ID] = { seq: this.sim.serverTick, clientTick: this.sim.serverTick, buttons };
+    inputs[BOT_SESSION_ID] = { seq: this.sim.serverTick, clientTick: this.sim.serverTick, buttons, pressed };
+  }
+
+  private consumeOneShotInputs(): void {
+    for (const [sessionId, input] of this.lastInputs) {
+      const pressed = input.pressed ?? 0;
+      if (pressed === 0) continue;
+      this.lastInputs.set(sessionId, { ...input, pressed: pressed & ~ONE_SHOT_INPUT_MASK });
+    }
   }
 
   private addPracticeBot(): void {

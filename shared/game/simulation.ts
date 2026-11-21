@@ -1,7 +1,7 @@
 import { ATTACKS, attackDuration } from "./attacks";
 import { ARENA, FIGHTER, ROUND, SIMULATION } from "./constants";
 import { hurtboxFor, intersects, isAttackFromFront, pushboxFor, worldHitbox } from "./boxes";
-import { hasButton, normalizeButtons } from "./input";
+import { hasButton, INPUT_BITS, normalizeButtons } from "./input";
 import type { AttackId, CombatEvent, Facing, FighterAction, FighterSimState, InputPayload, MatchMode, MatchSimState, TeamId } from "./types";
 
 const clamp = (value: number, min: number, max: number): number => Math.max(min, Math.min(max, value));
@@ -32,6 +32,8 @@ export const createFighter = (id: string, slot: number, name: string, teamId: Te
     actionFrame: 0,
     attackId: "",
     attackSeq: 0,
+    attackBufferId: "",
+    attackBufferTicks: 0,
     cooldownTicks: 0,
     dashTicks: 0,
     dashCooldownTicks: 0,
@@ -73,6 +75,8 @@ export const resetFighterForRound = (fighter: FighterSimState): void => {
   fighter.actionFrame = 0;
   fighter.attackId = "";
   fighter.attackSeq = 0;
+  fighter.attackBufferId = "";
+  fighter.attackBufferTicks = 0;
   fighter.cooldownTicks = 0;
   fighter.dashTicks = 0;
   fighter.dashCooldownTicks = 0;
@@ -134,19 +138,29 @@ const chooseAttack = (buttons: number): AttackId | null => {
   return null;
 };
 
+export const ONE_SHOT_INPUT_MASK = INPUT_BITS.light | INPUT_BITS.heavy | INPUT_BITS.kick | INPUT_BITS.dash;
+
+const chooseAttackPress = (pressed: number): AttackId | null => (
+  chooseAttack(pressed)
+);
+
 const beginAttack = (fighter: FighterSimState, attackId: AttackId): void => {
   fighter.action = "attack";
   fighter.actionFrame = 0;
   fighter.attackId = attackId;
+  fighter.attackBufferId = "";
+  fighter.attackBufferTicks = 0;
   fighter.attackSeq += 1;
   fighter.cooldownTicks = ATTACKS[attackId].cooldown;
-  fighter.vx *= 0.25;
+  fighter.vx *= 0.45;
 };
 
 const advanceTimers = (fighter: FighterSimState): void => {
   fighter.actionFrame += 1;
   fighter.cooldownTicks = Math.max(0, fighter.cooldownTicks - 1);
   fighter.dashCooldownTicks = Math.max(0, fighter.dashCooldownTicks - 1);
+  fighter.attackBufferTicks = Math.max(0, fighter.attackBufferTicks - 1);
+  if (fighter.attackBufferTicks <= 0) fighter.attackBufferId = "";
   fighter.invulnTicks = Math.max(0, fighter.invulnTicks - 1);
   fighter.hitstunTicks = Math.max(0, fighter.hitstunTicks - 1);
   fighter.blockstunTicks = Math.max(0, fighter.blockstunTicks - 1);
@@ -165,8 +179,19 @@ const advanceTimers = (fighter: FighterSimState): void => {
 
 const resolveInput = (fighter: FighterSimState, input: InputPayload | undefined, events: CombatEvent[], match: MatchSimState): void => {
   const buttons = normalizeButtons(input?.buttons ?? 0);
+  const pressed = normalizeButtons(input?.pressed ?? 0);
   if (input && input.seq > fighter.inputAck) fighter.inputAck = input.seq;
   if (fighter.action === "ko" || fighter.action === "knockdown") return;
+  const requestedAttackId = chooseAttackPress(pressed);
+  const wantsJump = hasButton(buttons, "jump");
+  if (wantsJump && !requestedAttackId) {
+    fighter.attackBufferId = "";
+    fighter.attackBufferTicks = 0;
+  }
+  if (requestedAttackId && !canAct(fighter)) {
+    fighter.attackBufferId = requestedAttackId;
+    fighter.attackBufferTicks = FIGHTER.inputBufferTicks;
+  }
 
   if (fighter.hitstunTicks > 0) {
     setAction(fighter, "hitstun");
@@ -185,6 +210,18 @@ const resolveInput = (fighter: FighterSimState, input: InputPayload | undefined,
 
   if (!canAct(fighter)) return;
 
+  const left = hasButton(buttons, "left");
+  const right = hasButton(buttons, "right");
+  const move = left === right ? 0 : left ? -1 : 1;
+  if (wantsJump && fighter.grounded && !requestedAttackId) {
+    fighter.vx = move * FIGHTER.walkSpeed;
+    if (move !== 0) fighter.facing = move as Facing;
+    fighter.vy = FIGHTER.jumpVelocity;
+    fighter.grounded = false;
+    setAction(fighter, "jump");
+    return;
+  }
+
   const wantsBlock = hasButton(buttons, "block");
   if (wantsBlock && fighter.grounded) {
     fighter.vx = 0;
@@ -192,30 +229,29 @@ const resolveInput = (fighter: FighterSimState, input: InputPayload | undefined,
     return;
   }
 
-  const attackId = chooseAttack(buttons);
+  const attackId = fighter.attackBufferId || requestedAttackId;
   if (attackId && fighter.cooldownTicks <= 0) {
     beginAttack(fighter, attackId);
     return;
   }
 
-  if (hasButton(buttons, "dash") && fighter.dashCooldownTicks <= 0) {
+  if (hasButton(pressed, "dash") && fighter.dashCooldownTicks <= 0) {
+    const dashDirection = left === right ? fighter.facing : left ? -1 : 1;
+    fighter.facing = dashDirection as Facing;
     fighter.dashTicks = FIGHTER.dashTicks;
     fighter.dashCooldownTicks = FIGHTER.dashCooldownTicks;
-    fighter.vx = fighter.facing * FIGHTER.dashSpeed;
+    fighter.vx = dashDirection * FIGHTER.dashSpeed;
     setAction(fighter, "dash");
     pushEvent(match, events, "dash", fighter.id, "", fighter.x, fighter.y - 70);
     return;
   }
 
-  if (hasButton(buttons, "jump") && fighter.grounded) {
+  if (wantsJump && fighter.grounded) {
     fighter.vy = FIGHTER.jumpVelocity;
     fighter.grounded = false;
     setAction(fighter, "jump");
   }
 
-  const left = hasButton(buttons, "left");
-  const right = hasButton(buttons, "right");
-  const move = left === right ? 0 : left ? -1 : 1;
   fighter.vx = move * FIGHTER.walkSpeed;
   if (move !== 0) fighter.facing = move as Facing;
   setAction(fighter, fighter.grounded ? (move === 0 ? "idle" : "walk") : "jump");
